@@ -8,7 +8,104 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
+
+var (
+	cacheItem = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "set",
+			Help:      "Current number of cached items",
+		},
+	)
+
+	cacheAddTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "add_total",
+			Help:      "Total number of add operations",
+		},
+	)
+
+	cacheDecrementTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "decrement_total",
+			Help:      "Total number of decrement operations",
+		},
+	)
+
+	cacheDeleteTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "delete_total",
+			Help:      "Total number of delete operations",
+		},
+	)
+
+	cacheFlushTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "flush_total",
+			Help:      "Total number of flush operations",
+		},
+	)
+
+	cacheIncrementTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "increment_total",
+			Help:      "Total number of increment operations",
+		},
+	)
+
+	cacheReplaceTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "replace_total",
+			Help:      "Total number of replace operations",
+		},
+	)
+
+	cacheSetTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "set_total",
+			Help:      "Total number of set operations",
+		},
+	)
+
+	cacheJanitorLastRun = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "go",
+			Subsystem: "cache",
+			Name:      "janitor_last_run",
+			Help:      "Timestamp of last janitor run",
+		},
+	)
+)
+
+func init() {
+	prometheus.MustRegister(cacheItem)
+	prometheus.MustRegister(cacheAddTotal)
+	prometheus.MustRegister(cacheDecrementTotal)
+	prometheus.MustRegister(cacheDeleteTotal)
+	prometheus.MustRegister(cacheFlushTotal)
+	prometheus.MustRegister(cacheIncrementTotal)
+	prometheus.MustRegister(cacheReplaceTotal)
+	prometheus.MustRegister(cacheSetTotal)
+	prometheus.MustRegister(cacheJanitorLastRun)
+}
 
 type Item struct {
 	Object     interface{}
@@ -65,6 +162,8 @@ func (c *cache) Set(k string, x interface{}, d time.Duration) {
 	// TODO: Calls to mu.Unlock are currently not deferred because defer
 	// adds ~200 ns (as of go1.)
 	c.mu.Unlock()
+	cacheItem.Inc()
+	cacheSetTotal.Inc()
 }
 
 func (c *cache) set(k string, x interface{}, d time.Duration) {
@@ -91,13 +190,17 @@ func (c *cache) SetDefault(k string, x interface{}) {
 // key, or if the existing item has expired. Returns an error otherwise.
 func (c *cache) Add(k string, x interface{}, d time.Duration) error {
 	c.mu.Lock()
-	_, found := c.get(k)
+	ov, found := c.get(k)
 	if found {
 		c.mu.Unlock()
 		return fmt.Errorf("Item %s already exists", k)
 	}
 	c.set(k, x, d)
 	c.mu.Unlock()
+	if ov == nil {
+		cacheItem.Inc()
+	}
+	cacheAddTotal.Inc()
 	return nil
 }
 
@@ -112,6 +215,7 @@ func (c *cache) Replace(k string, x interface{}, d time.Duration) error {
 	}
 	c.set(k, x, d)
 	c.mu.Unlock()
+	cacheReplaceTotal.Inc()
 	return nil
 }
 
@@ -165,6 +269,10 @@ func (c *cache) GetWithExpiration(k string) (interface{}, time.Time, bool) {
 	return item.Object, time.Time{}, true
 }
 
+// get returns an item from the cache
+// key found and item not expired => (value, true)
+// key found and item expired     => (value, false)
+// key not found                  => (nil, false)
 func (c *cache) get(k string) (interface{}, bool) {
 	item, found := c.items[k]
 	if !found {
@@ -173,7 +281,7 @@ func (c *cache) get(k string) (interface{}, bool) {
 	// "Inlining" of Expired
 	if item.Expiration > 0 {
 		if time.Now().UnixNano() > item.Expiration {
-			return nil, false
+			return item.Object, false
 		}
 	}
 	return item.Object, true
@@ -224,6 +332,7 @@ func (c *cache) Increment(k string, n int64) error {
 	}
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nil
 }
 
@@ -250,6 +359,7 @@ func (c *cache) IncrementFloat(k string, n float64) error {
 	}
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nil
 }
 
@@ -272,6 +382,7 @@ func (c *cache) IncrementInt(k string, n int) (int, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -294,6 +405,7 @@ func (c *cache) IncrementInt8(k string, n int8) (int8, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -316,6 +428,7 @@ func (c *cache) IncrementInt16(k string, n int16) (int16, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -338,6 +451,7 @@ func (c *cache) IncrementInt32(k string, n int32) (int32, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -360,6 +474,7 @@ func (c *cache) IncrementInt64(k string, n int64) (int64, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -382,6 +497,7 @@ func (c *cache) IncrementUint(k string, n uint) (uint, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -404,6 +520,7 @@ func (c *cache) IncrementUintptr(k string, n uintptr) (uintptr, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -426,6 +543,7 @@ func (c *cache) IncrementUint8(k string, n uint8) (uint8, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -448,6 +566,7 @@ func (c *cache) IncrementUint16(k string, n uint16) (uint16, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -470,6 +589,7 @@ func (c *cache) IncrementUint32(k string, n uint32) (uint32, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -492,6 +612,7 @@ func (c *cache) IncrementUint64(k string, n uint64) (uint64, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -514,6 +635,7 @@ func (c *cache) IncrementFloat32(k string, n float32) (float32, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -536,6 +658,7 @@ func (c *cache) IncrementFloat64(k string, n float64) (float64, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheIncrementTotal.Inc()
 	return nv, nil
 }
 
@@ -586,6 +709,7 @@ func (c *cache) Decrement(k string, n int64) error {
 	}
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nil
 }
 
@@ -612,6 +736,7 @@ func (c *cache) DecrementFloat(k string, n float64) error {
 	}
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nil
 }
 
@@ -634,6 +759,7 @@ func (c *cache) DecrementInt(k string, n int) (int, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -656,6 +782,7 @@ func (c *cache) DecrementInt8(k string, n int8) (int8, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -678,6 +805,7 @@ func (c *cache) DecrementInt16(k string, n int16) (int16, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -700,6 +828,7 @@ func (c *cache) DecrementInt32(k string, n int32) (int32, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -722,6 +851,7 @@ func (c *cache) DecrementInt64(k string, n int64) (int64, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -744,6 +874,7 @@ func (c *cache) DecrementUint(k string, n uint) (uint, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -766,6 +897,7 @@ func (c *cache) DecrementUintptr(k string, n uintptr) (uintptr, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -788,6 +920,7 @@ func (c *cache) DecrementUint8(k string, n uint8) (uint8, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -810,6 +943,7 @@ func (c *cache) DecrementUint16(k string, n uint16) (uint16, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -832,6 +966,7 @@ func (c *cache) DecrementUint32(k string, n uint32) (uint32, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -854,6 +989,7 @@ func (c *cache) DecrementUint64(k string, n uint64) (uint64, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -876,6 +1012,7 @@ func (c *cache) DecrementFloat32(k string, n float32) (float32, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -898,6 +1035,7 @@ func (c *cache) DecrementFloat64(k string, n float64) (float64, error) {
 	v.Object = nv
 	c.items[k] = v
 	c.mu.Unlock()
+	cacheDecrementTotal.Inc()
 	return nv, nil
 }
 
@@ -906,20 +1044,24 @@ func (c *cache) Delete(k string) {
 	c.mu.Lock()
 	v, evicted := c.delete(k)
 	c.mu.Unlock()
-	if evicted {
+	if c.onEvicted != nil && evicted {
 		c.onEvicted(k, v)
 	}
 }
 
 func (c *cache) delete(k string) (interface{}, bool) {
-	if c.onEvicted != nil {
-		if v, found := c.items[k]; found {
-			delete(c.items, k)
-			return v.Object, true
-		}
+	var found = false
+	var ret interface{}
+
+	if v, ok := c.items[k]; ok {
+		found = true
+		ret = v.Object
+		delete(c.items, k)
+		cacheItem.Dec()
+		cacheDeleteTotal.Inc()
 	}
-	delete(c.items, k)
-	return nil, false
+
+	return ret, found
 }
 
 type keyAndValue struct {
@@ -936,7 +1078,7 @@ func (c *cache) DeleteExpired() {
 		// "Inlining" of expired
 		if v.Expiration > 0 && now > v.Expiration {
 			ov, evicted := c.delete(k)
-			if evicted {
+			if c.onEvicted != nil && evicted {
 				evictedItems = append(evictedItems, keyAndValue{k, ov})
 			}
 		}
@@ -1007,9 +1149,13 @@ func (c *cache) Load(r io.Reader) error {
 		c.mu.Lock()
 		defer c.mu.Unlock()
 		for k, v := range items {
-			ov, found := c.items[k]
-			if !found || ov.Expired() {
+			ov, found := c.get(k)
+			if !found {
 				c.items[k] = v
+
+				if ov == nil {
+					cacheItem.Inc()
+				}
 			}
 		}
 	}
@@ -1064,8 +1210,10 @@ func (c *cache) ItemCount() int {
 // Delete all items from the cache.
 func (c *cache) Flush() {
 	c.mu.Lock()
+	cacheItem.Sub(float64(len(c.items)))
 	c.items = map[string]Item{}
 	c.mu.Unlock()
+	cacheFlushTotal.Inc()
 }
 
 type janitor struct {
@@ -1078,6 +1226,7 @@ func (j *janitor) Run(c *cache) {
 	for {
 		select {
 		case <-ticker.C:
+			cacheJanitorLastRun.Set(float64(time.Now().Unix()))
 			c.DeleteExpired()
 		case <-j.stop:
 			ticker.Stop()
@@ -1107,6 +1256,7 @@ func newCache(de time.Duration, m map[string]Item) *cache {
 		defaultExpiration: de,
 		items:             m,
 	}
+	cacheItem.Add(float64(len(m)))
 	return c
 }
 
