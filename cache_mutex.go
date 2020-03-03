@@ -93,7 +93,7 @@ func (c *cache) SetDefault(k string, x interface{}) {
 // key, or if the existing item has expired. Returns an error otherwise.
 func (c *cache) Add(k string, x interface{}, d time.Duration) error {
 	c.mu.Lock()
-	ov, found := c.get(k)
+	_, found := c.get(k)
 	if found {
 		c.mu.Unlock()
 		return fmt.Errorf("Item %s already exists", k)
