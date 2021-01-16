@@ -1,4 +1,4 @@
-module github.com/sylr/go-cache/v2
+module sylr.dev/cache/v2
 
 go 1.14
 

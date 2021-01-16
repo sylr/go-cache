@@ -1,5 +1,12 @@
 # go-cache
 
+## sylr.dev/cache fork disclaimer
+
+This module is a fork of [github.com/patrickmn/go-cache/](https://github.com/patrickmn/go-cache/).
+
+I forked it because it has been unmaintained for quite some time now.
+## Synopsys
+
 go-cache is an in-memory key:value store/cache similar to memcached that is
 suitable for applications running on a single machine. Its major advantage is
 that, being essentially a thread-safe `map[string]interface{}` with expiration
@@ -15,14 +22,14 @@ one) to recover from downtime quickly. (See the docs for `NewFrom()` for caveats
 
 ### Installation
 
-`go get github.com/patrickmn/go-cache`
+`go get sylr.dev/cache/v2`
 
 ### Usage
 
 ```go
 import (
 	"fmt"
-	"github.com/patrickmn/go-cache"
+	"sylr.dev/cache/v2"
 	"time"
 )
 
@@ -80,4 +87,4 @@ func main() {
 
 ### Reference
 
-`godoc` or [http://godoc.org/github.com/patrickmn/go-cache](http://godoc.org/github.com/patrickmn/go-cache)
+`godoc` or [http://pkg.go.dev/sylr.dev/cache/v2](http://pkg.go.dev/sylr.dev/cache/v2)
