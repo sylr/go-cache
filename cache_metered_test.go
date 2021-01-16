@@ -15,7 +15,12 @@ import (
 
 func init() {
 	http.Handle("/metrics", promhttp.Handler())
-	go http.ListenAndServe("localhost:9000", nil)
+	go func() {
+		err := http.ListenAndServe("localhost:9000", nil)
+		if err != nil {
+			panic(err)
+		}
+	}()
 }
 
 func TestMeteredCache(t *testing.T) {
@@ -1311,11 +1316,11 @@ func TestMeteredSerializeUnserializable(t *testing.T) {
 }
 
 func BenchmarkMeteredCacheGetExpiring(b *testing.B) {
-	benchmarkCacheGet(b, 5*time.Minute)
+	benchmarkMeteredCacheGet(b, 5*time.Minute)
 }
 
 func BenchmarkMeteredCacheGetNotExpiring(b *testing.B) {
-	benchmarkCacheGet(b, NoExpiration)
+	benchmarkMeteredCacheGet(b, NoExpiration)
 }
 
 func benchmarkMeteredCacheGet(b *testing.B, exp time.Duration) {
@@ -1337,7 +1342,7 @@ func BenchmarkMeteredRWMutexMapGet(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		mu.RLock()
-		_, _ = m["foo"]
+		_, _ = m["foo"] //nolint:gosimple
 		mu.RUnlock()
 	}
 }
@@ -1352,7 +1357,7 @@ func BenchmarkMeteredRWMutexInterfaceMapGetStruct(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		mu.RLock()
-		_, _ = m[s]
+		_, _ = m[s] //nolint:gosimple
 		mu.RUnlock()
 	}
 }
@@ -1366,17 +1371,17 @@ func BenchmarkMeteredRWMutexInterfaceMapGetString(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		mu.RLock()
-		_, _ = m["foo"]
+		_, _ = m["foo"] //nolint:gosimple
 		mu.RUnlock()
 	}
 }
 
 func BenchmarkMeteredCacheGetConcurrentExpiring(b *testing.B) {
-	benchmarkCacheGetConcurrent(b, 5*time.Minute)
+	benchmarkMeteredCacheGetConcurrent(b, 5*time.Minute)
 }
 
 func BenchmarkMeteredCacheGetConcurrentNotExpiring(b *testing.B) {
-	benchmarkCacheGetConcurrent(b, NoExpiration)
+	benchmarkMeteredCacheGetConcurrent(b, NoExpiration)
 }
 
 func benchmarkMeteredCacheGetConcurrent(b *testing.B, exp time.Duration) {
@@ -1414,7 +1419,7 @@ func BenchmarkMeteredRWMutexMapGetConcurrent(b *testing.B) {
 		go func() {
 			for j := 0; j < each; j++ {
 				mu.RLock()
-				_, _ = m["foo"]
+				_, _ = m["foo"] //nolint:gosimple
 				mu.RUnlock()
 			}
 			wg.Done()
@@ -1424,11 +1429,11 @@ func BenchmarkMeteredRWMutexMapGetConcurrent(b *testing.B) {
 }
 
 func BenchmarkMeteredCacheGetManyConcurrentExpiring(b *testing.B) {
-	benchmarkCacheGetManyConcurrent(b, 5*time.Minute)
+	benchmarkMeteredCacheGetManyConcurrent(b, 5*time.Minute)
 }
 
 func BenchmarkMeteredCacheGetManyConcurrentNotExpiring(b *testing.B) {
-	benchmarkCacheGetManyConcurrent(b, NoExpiration)
+	benchmarkMeteredCacheGetManyConcurrent(b, NoExpiration)
 }
 
 func benchmarkMeteredCacheGetManyConcurrent(b *testing.B, exp time.Duration) {
@@ -1460,11 +1465,11 @@ func benchmarkMeteredCacheGetManyConcurrent(b *testing.B, exp time.Duration) {
 }
 
 func BenchmarkMeteredCacheSetExpiring(b *testing.B) {
-	benchmarkCacheSet(b, 5*time.Minute)
+	benchmarkMeteredCacheSet(b, 5*time.Minute)
 }
 
 func BenchmarkMeteredCacheSetNotExpiring(b *testing.B) {
-	benchmarkCacheSet(b, NoExpiration)
+	benchmarkMeteredCacheSet(b, NoExpiration)
 }
 
 func benchmarkMeteredCacheSet(b *testing.B, exp time.Duration) {

@@ -130,10 +130,10 @@ type shardedJanitor struct {
 
 func (j *shardedJanitor) Run(sc *shardedCache) {
 	j.stop = make(chan bool)
-	tick := time.Tick(j.Interval)
+	tick := time.NewTicker(j.Interval)
 	for {
 		select {
-		case <-tick:
+		case <-tick.C:
 			sc.DeleteExpired()
 		case <-j.stop:
 			return
