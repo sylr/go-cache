@@ -1452,7 +1452,7 @@ func BenchmarkRWMutexMapGet(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		mu.RLock()
-		_, _ = m["foo"]
+		_, _ = m["foo"] //nolint:gosimple
 		mu.RUnlock()
 	}
 }
@@ -1467,7 +1467,7 @@ func BenchmarkRWMutexInterfaceMapGetStruct(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		mu.RLock()
-		_, _ = m[s]
+		_, _ = m[s] //nolint:gosimple
 		mu.RUnlock()
 	}
 }
@@ -1481,7 +1481,7 @@ func BenchmarkRWMutexInterfaceMapGetString(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		mu.RLock()
-		_, _ = m["foo"]
+		_, _ = m["foo"] //nolint:gosimple
 		mu.RUnlock()
 	}
 }
@@ -1529,7 +1529,7 @@ func BenchmarkRWMutexMapGetConcurrent(b *testing.B) {
 		go func() {
 			for j := 0; j < each; j++ {
 				mu.RLock()
-				_, _ = m["foo"]
+				_, _ = m["foo"] //nolint:gosimple
 				mu.RUnlock()
 			}
 			wg.Done()

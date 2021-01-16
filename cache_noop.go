@@ -321,7 +321,7 @@ func (c *noopCache) LoadFile(fname string) error {
 
 // Items copies all unexpired items in the cache into a new map and returns it.
 func (c *noopCache) Items() map[string]Item {
-	m := make(map[string]Item, 0)
+	m := make(map[string]Item)
 	return m
 }
 
