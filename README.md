@@ -5,6 +5,7 @@
 This module is a fork of [github.com/patrickmn/go-cache/](https://github.com/patrickmn/go-cache/).
 
 I forked it because it has been unmaintained for quite some time now.
+
 ## Synopsys
 
 go-cache is an in-memory key:value store/cache similar to memcached that is
@@ -22,24 +23,24 @@ one) to recover from downtime quickly. (See the docs for `NewFrom()` for caveats
 
 ### Installation
 
-`go get sylr.dev/cache/v2`
+`go get sylr.dev/cache/v3`
 
 ### Usage
 
 ```go
 import (
 	"fmt"
-	"sylr.dev/cache/v2"
+	"sylr.dev/cache/v3"
 	"time"
 )
 
 func main() {
 	// Create a cache with a default expiration time of 5 minutes, and which
 	// purges expired items every 10 minutes
-	c := cache.New(5*time.Minute, 10*time.Minute)
+	cAny := cache.New[any](5*time.Minute, 10*time.Minute)
 
 	// Set the value of the key "foo" to "bar", with the default expiration time
-	c.Set("foo", "bar", cache.DefaultExpiration)
+	cAny.Set("foo", "bar", cache.DefaultExpiration)
 
 	// Set the value of the key "baz" to 42, with no expiration time
 	// (the item won't be removed until it is re-set, or removed using
@@ -49,7 +50,7 @@ func main() {
 	// Get the string associated with the key "foo" from the cache
 	foo, found := c.Get("foo")
 	if found {
-		fmt.Println(foo)
+		fmt.Println(*foo)
 	}
 
 	// Since Go is statically typed, and cache values can be anything, type
@@ -59,7 +60,7 @@ func main() {
 	// function--is:
 	foo, found := c.Get("foo")
 	if found {
-		MyFunction(foo.(string))
+		MyFunction(foo))
 	}
 
 	// This gets tedious if the value is used several times in the same function.
@@ -87,4 +88,4 @@ func main() {
 
 ### Reference
 
-`godoc` or [http://pkg.go.dev/sylr.dev/cache/v2](http://pkg.go.dev/sylr.dev/cache/v2)
+`godoc` or [http://pkg.go.dev/sylr.dev/cache/v3](http://pkg.go.dev/sylr.dev/cache/v3)

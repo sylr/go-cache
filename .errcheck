@@ -1,8 +1,5 @@
-(*sylr.dev/cache/v2.MeteredCache).Add
-(*sylr.dev/cache/v2.MeteredCache).IncrementInt
-(*sylr.dev/cache/v2.MeteredCache).SaveFile
-(*sylr.dev/cache/v2.cache).Add
-(*sylr.dev/cache/v2.cache).IncrementInt
-(*sylr.dev/cache/v2.cache).SaveFile
+(*sylr.dev/cache/v3.cache).Add
+(*sylr.dev/cache/v3.cache).IncrementInt
+(*sylr.dev/cache/v3.cache).SaveFile
 (*os.File).Close	
 (*os.File).Write	
