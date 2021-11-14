@@ -1,5 +1,2 @@
-(*sylr.dev/cache/v3.cache).Add
-(*sylr.dev/cache/v3.cache).IncrementInt
-(*sylr.dev/cache/v3.cache).SaveFile
 (*os.File).Close	
 (*os.File).Write	
