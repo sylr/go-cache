@@ -21,12 +21,12 @@ type AnyCacher[T any] interface {
 	Flush()
 	// Get an item from the cache. Returns the item or nil, and a bool indicating
 	// whether the key was found.
-	Get(k string) (*T, bool)
+	Get(k string) (T, bool)
 	// GetWithExpiration returns an item and its expiration time from the cache.
 	// It returns the item or nil, the expiration time if one is set (if the item
 	// never expires a zero value for time.Time is returned), and a bool indicating
 	// whether the key was found.
-	GetWithExpiration(k string) (*T, time.Time, bool)
+	GetWithExpiration(k string) (T, time.Time, bool)
 	// ItemCount returns the number of items in the cache.
 	ItemCount() int
 	// Copies all unexpired items in the cache into a new map and returns it.
@@ -44,7 +44,7 @@ type AnyCacher[T any] interface {
 	// Sets an (optional) function that is called with the key and value when an
 	// item is evicted from the cache. (Including when it is deleted manually, but
 	// not when it is overwritten.) Set to nil to disable.
-	OnEvicted(f func(string, *T))
+	OnEvicted(f func(string, T))
 }
 
 type NumericCacher[T Numeric] interface {
@@ -52,9 +52,9 @@ type NumericCacher[T Numeric] interface {
 	// Decrement an item of type int8 by n. Returns an error if the item's value is
 	// not an int8, or if it was not found. If there is no error, the decremented
 	// value is returned.
-	Decrement(k string, n T) (*T, error)
+	Decrement(k string, n T) (T, error)
 	// Increment an item of type int32 by n. Returns an error if the item's value is
 	// not an int32, or if it was not found. If there is no error, the incremented
 	// value is returned.
-	Increment(k string, n T) (*T, error)
+	Increment(k string, n T) (T, error)
 }

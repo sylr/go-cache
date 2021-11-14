@@ -40,7 +40,7 @@ type cache[T any] struct {
 	defaultExpiration time.Duration
 	items             map[string]Item[T]
 	mu                sync.RWMutex
-	onEvicted         func(string, *T)
+	onEvicted         func(string, T)
 	janitor           *janitor[T]
 }
 
@@ -121,69 +121,74 @@ func (c *cache[T]) Replace(k string, x T, d time.Duration) error {
 
 // Get gets an item from the cache. Returns the item or nil, and a bool indicating
 // whether the key was found.
-func (c *cache[T]) Get(k string) (*T, bool) {
+func (c *cache[T]) Get(k string) (T, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
 	// "Inlining" of get and Expired
 	item, found := c.items[k]
 	if !found {
-		return nil, false
+		var ret T
+		return ret, false
 	}
 
 	if item.Expiration > 0 {
 		if time.Now().UnixNano() > item.Expiration {
-			return nil, false
+			var ret T
+			return ret, false
 		}
 	}
 
-	return &item.Object, true
+	return item.Object, true
 }
 
 // GetWithExpiration returns an item and its expiration time from the cache.
 // It returns the item or nil, the expiration time if one is set (if the item
 // never expires a zero value for time.Time is returned), and a bool indicating
 // whether the key was found.
-func (c *cache[T]) GetWithExpiration(k string) (*T, time.Time, bool) {
+func (c *cache[T]) GetWithExpiration(k string) (T, time.Time, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
 	// "Inlining" of get and Expired
 	item, found := c.items[k]
 	if !found {
-		return nil, time.Time{}, false
+		var ret T
+		return ret, time.Time{}, false
 	}
 
 	if item.Expiration > 0 {
 		if time.Now().UnixNano() > item.Expiration {
-			return nil, time.Time{}, false
+			var ret T
+			return ret, time.Time{}, false
 		}
 
 		// Return the item and the expiration time
-		return &item.Object, time.Unix(0, item.Expiration), true
+		return item.Object, time.Unix(0, item.Expiration), true
 	}
 
 	// If expiration <= 0 (i.e. no expiration time set) then return the item
 	// and a zeroed time.Time
-	return &item.Object, time.Time{}, true
+	return item.Object, time.Time{}, true
 }
 
 // get returns an item from the cache
 // key found and item not expired => (value, true)
 // key found and item expired     => (value, false)
 // key not found                  => (nil, false)
-func (c *cache[T]) get(k string) (*T, bool) {
+func (c *cache[T]) get(k string) (T, bool) {
 	item, found := c.items[k]
 	if !found {
-		return nil, false
+		var ret T
+		return ret, false
 	}
 	// "Inlining" of Expired
 	if item.Expiration > 0 {
 		if time.Now().UnixNano() > item.Expiration {
-			return &item.Object, false
+			return item.Object, false
 		}
 	}
-	return &item.Object, true
+	return item.Object, true
 }
 
 // Cache implements Cacher
@@ -201,21 +206,22 @@ type numericCache[T Numeric] struct {
 // item's value is not an integer, if it was not found, or if it is not
 // possible to increment it by n. To retrieve the incremented value, use one
 // of the specialized methods, e.g. IncrementInt64.
-func (c *numericCache[T]) Increment(k string, n T) (*T, error) {
+func (c *numericCache[T]) Increment(k string, n T) (T, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	v, found := c.items[k]
 
 	if !found || v.Expired() {
-		return nil, fmt.Errorf("Item %s not found", k)
+		var ret T
+		return ret, fmt.Errorf("Item %s not found", k)
 	}
 
 	nv := v.Object + n
 	v.Object = nv
 	c.items[k] = v
 
-	return &nv, nil
+	return nv, nil
 }
 
 // Decrement decrements an item of type int, int8, int16, int32, int64, uintptr, uint,
@@ -223,7 +229,7 @@ func (c *numericCache[T]) Increment(k string, n T) (*T, error) {
 // item's value is not an integer, if it was not found, or if it is not
 // possible to decrement it by n. To retrieve the decremented value, use one
 // of the specialized methods, e.g. DecrementInt64.
-func (c *numericCache[T]) Decrement(k string, n T) (*T, error) {
+func (c *numericCache[T]) Decrement(k string, n T) (T, error) {
 	// TODO: Implement Increment and Decrement more cleanly.
 	// (Cannot do Increment(k, n*-1) for uints.)
 	c.mu.Lock()
@@ -232,14 +238,15 @@ func (c *numericCache[T]) Decrement(k string, n T) (*T, error) {
 	v, found := c.items[k]
 
 	if !found || v.Expired() {
-		return nil, fmt.Errorf("Item not found")
+		var ret T
+		return ret, fmt.Errorf("Item not found")
 	}
 
 	nv := v.Object - n
 	v.Object = nv
 	c.items[k] = v
 
-	return &nv, nil
+	return nv, nil
 }
 
 // Delete deletes an item from the cache. Does nothing if the key is not in the cache.
@@ -253,7 +260,7 @@ func (c *cache[T]) Delete(k string) {
 	}
 }
 
-func (c *cache[T]) delete(k string) (*T, bool) {
+func (c *cache[T]) delete(k string) (T, bool) {
 	var found = false
 	var ret T
 
@@ -263,12 +270,12 @@ func (c *cache[T]) delete(k string) (*T, bool) {
 		delete(c.items, k)
 	}
 
-	return &ret, found
+	return ret, found
 }
 
 type keyAndValue[T any] struct {
 	key   string
-	value *T
+	value T
 }
 
 // DeleteExpired deletes all expired items from the cache.
@@ -302,7 +309,7 @@ func (c *cache[T]) setJanitor(j *janitor[T]) {
 // OnEvicted sets an (optional) function that is called with the key and value when an
 // item is evicted from the cache. (Including when it is deleted manually, but
 // not when it is overwritten.) Set to nil to disable.
-func (c *cache[T]) OnEvicted(f func(string, *T)) {
+func (c *cache[T]) OnEvicted(f func(string, T)) {
 	c.mu.Lock()
 	c.onEvicted = f
 	c.mu.Unlock()

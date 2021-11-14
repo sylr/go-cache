@@ -41,7 +41,7 @@ func TestCache(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for a is nil")
-	} else if a2 := (*x).(int); a2+2 != 3 {
+	} else if a2 := (x).(int); a2+2 != 3 {
 		t.Error("a2 (which should be 1) plus 2 does not equal 3; value:", a2)
 	}
 
@@ -51,7 +51,7 @@ func TestCache(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for b is nil")
-	} else if b2 := (*x).(string); b2+"B" != "bB" {
+	} else if b2 := (x).(string); b2+"B" != "bB" {
 		t.Error("b2 (which should be b) plus B does not equal bB; value:", b2)
 	}
 
@@ -61,7 +61,7 @@ func TestCache(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for c is nil")
-	} else if c2 := (*x).(float64); c2+1.2 != 4.7 {
+	} else if c2 := (x).(float64); c2+1.2 != 4.7 {
 		t.Error("c2 (which should be 3.5) plus 1.2 does not equal 4.7; value:", c2)
 	}
 }
@@ -120,14 +120,14 @@ func TestNewFrom(t *testing.T) {
 	if !found {
 		t.Fatal("Did not find a")
 	}
-	if *a != 1 {
+	if a != 1 {
 		t.Fatal("a is not 1")
 	}
 	b, found := tc.Get("b")
 	if !found {
 		t.Fatal("Did not find b")
 	}
-	if *b != 2 {
+	if b != 2 {
 		t.Fatal("b is not 2")
 	}
 }
@@ -139,7 +139,7 @@ func TestStorePointerToStruct(t *testing.T) {
 	if !found {
 		t.Fatal("*TestStruct was not found for foo")
 	}
-	foo := *x
+	foo := x
 	foo.Num++
 
 	y, found := tc.Get("foo")
@@ -163,7 +163,7 @@ func TestIncrementWithInt(t *testing.T) {
 	if !found {
 		t.Error("tint was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint is not 3:", x)
 	}
 }
@@ -179,7 +179,7 @@ func TestIncrementWithInt8(t *testing.T) {
 	if !found {
 		t.Error("tint8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint8 is not 3:", x)
 	}
 }
@@ -195,7 +195,7 @@ func TestIncrementWithInt16(t *testing.T) {
 	if !found {
 		t.Error("tint16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint16 is not 3:", x)
 	}
 }
@@ -211,7 +211,7 @@ func TestIncrementWithInt32(t *testing.T) {
 	if !found {
 		t.Error("tint32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint32 is not 3:", x)
 	}
 }
@@ -227,7 +227,7 @@ func TestIncrementWithInt64(t *testing.T) {
 	if !found {
 		t.Error("tint64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint64 is not 3:", x)
 	}
 }
@@ -243,7 +243,7 @@ func TestIncrementWithUint(t *testing.T) {
 	if !found {
 		t.Error("tuint was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint is not 3:", x)
 	}
 }
@@ -255,12 +255,11 @@ func TestIncrementWithUintptr(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-
 	x, found := tc.Get("tuintptr")
 	if !found {
 		t.Error("tuintptr was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuintptr is not 3:", x)
 	}
 }
@@ -276,7 +275,7 @@ func TestIncrementWithUint8(t *testing.T) {
 	if !found {
 		t.Error("tuint8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint8 is not 3:", x)
 	}
 }
@@ -292,7 +291,7 @@ func TestIncrementWithUint16(t *testing.T) {
 	if !found {
 		t.Error("tuint16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint16 is not 3:", x)
 	}
 }
@@ -308,7 +307,7 @@ func TestIncrementWithUint32(t *testing.T) {
 	if !found {
 		t.Error("tuint32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint32 is not 3:", x)
 	}
 }
@@ -324,7 +323,7 @@ func TestIncrementWithUint64(t *testing.T) {
 	if !found {
 		t.Error("tuint64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint64 is not 3:", x)
 	}
 }
@@ -340,7 +339,7 @@ func TestIncrementWithFloat32(t *testing.T) {
 	if !found {
 		t.Error("float32 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float32 is not 3.5:", x)
 	}
 }
@@ -356,7 +355,7 @@ func TestIncrementWithFloat64(t *testing.T) {
 	if !found {
 		t.Error("float64 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float64 is not 3.5:", x)
 	}
 }
@@ -372,7 +371,7 @@ func TestIncrementFloatWithFloat32(t *testing.T) {
 	if !found {
 		t.Error("float32 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float32 is not 3.5:", x)
 	}
 }
@@ -388,7 +387,7 @@ func TestIncrementFloatWithFloat64(t *testing.T) {
 	if !found {
 		t.Error("float64 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float64 is not 3.5:", x)
 	}
 }
@@ -404,7 +403,7 @@ func TestDecrementWithInt(t *testing.T) {
 	if !found {
 		t.Error("int was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int is not 3:", x)
 	}
 }
@@ -420,7 +419,7 @@ func TestDecrementWithInt8(t *testing.T) {
 	if !found {
 		t.Error("int8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int8 is not 3:", x)
 	}
 }
@@ -436,7 +435,7 @@ func TestDecrementWithInt16(t *testing.T) {
 	if !found {
 		t.Error("int16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int16 is not 3:", x)
 	}
 }
@@ -452,7 +451,7 @@ func TestDecrementWithInt32(t *testing.T) {
 	if !found {
 		t.Error("int32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int32 is not 3:", x)
 	}
 }
@@ -468,7 +467,7 @@ func TestDecrementWithInt64(t *testing.T) {
 	if !found {
 		t.Error("int64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int64 is not 3:", x)
 	}
 }
@@ -484,7 +483,7 @@ func TestDecrementWithUint(t *testing.T) {
 	if !found {
 		t.Error("uint was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint is not 3:", x)
 	}
 }
@@ -500,7 +499,7 @@ func TestDecrementWithUintptr(t *testing.T) {
 	if !found {
 		t.Error("uintptr was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uintptr is not 3:", x)
 	}
 }
@@ -516,7 +515,7 @@ func TestDecrementWithUint8(t *testing.T) {
 	if !found {
 		t.Error("uint8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint8 is not 3:", x)
 	}
 }
@@ -532,7 +531,7 @@ func TestDecrementWithUint16(t *testing.T) {
 	if !found {
 		t.Error("uint16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint16 is not 3:", x)
 	}
 }
@@ -548,7 +547,7 @@ func TestDecrementWithUint32(t *testing.T) {
 	if !found {
 		t.Error("uint32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint32 is not 3:", x)
 	}
 }
@@ -564,7 +563,7 @@ func TestDecrementWithUint64(t *testing.T) {
 	if !found {
 		t.Error("uint64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint64 is not 3:", x)
 	}
 }
@@ -580,7 +579,7 @@ func TestDecrementWithFloat32(t *testing.T) {
 	if !found {
 		t.Error("float32 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float32 is not 3:", x)
 	}
 }
@@ -596,7 +595,7 @@ func TestDecrementWithFloat64(t *testing.T) {
 	if !found {
 		t.Error("float64 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float64 is not 3:", x)
 	}
 }
@@ -612,7 +611,7 @@ func TestDecrementFloatWithFloat32(t *testing.T) {
 	if !found {
 		t.Error("float32 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float32 is not 3:", x)
 	}
 }
@@ -628,7 +627,7 @@ func TestDecrementFloatWithFloat64(t *testing.T) {
 	if !found {
 		t.Error("float64 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float64 is not 3:", x)
 	}
 }
@@ -640,14 +639,14 @@ func TestIncrementInt(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tint")
 	if !found {
 		t.Error("tint was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint is not 3:", x)
 	}
 }
@@ -659,14 +658,14 @@ func TestIncrementInt8(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tint8")
 	if !found {
 		t.Error("tint8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint8 is not 3:", x)
 	}
 }
@@ -678,14 +677,14 @@ func TestIncrementInt16(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tint16")
 	if !found {
 		t.Error("tint16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint16 is not 3:", x)
 	}
 }
@@ -697,14 +696,14 @@ func TestIncrementInt32(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tint32")
 	if !found {
 		t.Error("tint32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint32 is not 3:", x)
 	}
 }
@@ -716,14 +715,14 @@ func TestIncrementInt64(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tint64")
 	if !found {
 		t.Error("tint64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tint64 is not 3:", x)
 	}
 }
@@ -735,14 +734,14 @@ func TestIncrementUint(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tuint")
 	if !found {
 		t.Error("tuint was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint is not 3:", x)
 	}
 }
@@ -754,14 +753,14 @@ func TestIncrementUintptr(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tuintptr")
 	if !found {
 		t.Error("tuintptr was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuintptr is not 3:", x)
 	}
 }
@@ -773,14 +772,14 @@ func TestIncrementUint8(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tuint8")
 	if !found {
 		t.Error("tuint8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint8 is not 3:", x)
 	}
 }
@@ -792,14 +791,14 @@ func TestIncrementUint16(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tuint16")
 	if !found {
 		t.Error("tuint16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint16 is not 3:", x)
 	}
 }
@@ -811,14 +810,14 @@ func TestIncrementUint32(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tuint32")
 	if !found {
 		t.Error("tuint32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint32 is not 3:", x)
 	}
 }
@@ -830,14 +829,14 @@ func TestIncrementUint64(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("tuint64")
 	if !found {
 		t.Error("tuint64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("tuint64 is not 3:", x)
 	}
 }
@@ -849,14 +848,14 @@ func TestIncrementFloat32(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3.5 {
+	if n != 3.5 {
 		t.Error("Returned number is not 3.5:", n)
 	}
 	x, found := tc.Get("float32")
 	if !found {
 		t.Error("float32 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float32 is not 3.5:", x)
 	}
 }
@@ -868,14 +867,14 @@ func TestIncrementFloat64(t *testing.T) {
 	if err != nil {
 		t.Error("Error incrementing:", err)
 	}
-	if *n != 3.5 {
+	if n != 3.5 {
 		t.Error("Returned number is not 3.5:", n)
 	}
 	x, found := tc.Get("float64")
 	if !found {
 		t.Error("float64 was not found")
 	}
-	if *x != 3.5 {
+	if x != 3.5 {
 		t.Error("float64 is not 3.5:", x)
 	}
 }
@@ -887,14 +886,14 @@ func TestDecrementInt8(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("int8")
 	if !found {
 		t.Error("int8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int8 is not 3:", x)
 	}
 }
@@ -906,14 +905,14 @@ func TestDecrementInt16(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("int16")
 	if !found {
 		t.Error("int16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int16 is not 3:", x)
 	}
 }
@@ -925,14 +924,14 @@ func TestDecrementInt32(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("int32")
 	if !found {
 		t.Error("int32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int32 is not 3:", x)
 	}
 }
@@ -944,14 +943,14 @@ func TestDecrementInt64(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("int64")
 	if !found {
 		t.Error("int64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("int64 is not 3:", x)
 	}
 }
@@ -963,14 +962,14 @@ func TestDecrementUint(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("uint")
 	if !found {
 		t.Error("uint was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint is not 3:", x)
 	}
 }
@@ -982,14 +981,14 @@ func TestDecrementUintptr(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("uintptr")
 	if !found {
 		t.Error("uintptr was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uintptr is not 3:", x)
 	}
 }
@@ -1001,14 +1000,14 @@ func TestDecrementUint8(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("uint8")
 	if !found {
 		t.Error("uint8 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint8 is not 3:", x)
 	}
 }
@@ -1020,14 +1019,14 @@ func TestDecrementUint16(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("uint16")
 	if !found {
 		t.Error("uint16 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint16 is not 3:", x)
 	}
 }
@@ -1039,14 +1038,14 @@ func TestDecrementUint32(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("uint32")
 	if !found {
 		t.Error("uint32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint32 is not 3:", x)
 	}
 }
@@ -1058,14 +1057,14 @@ func TestDecrementUint64(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("uint64")
 	if !found {
 		t.Error("uint64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("uint64 is not 3:", x)
 	}
 }
@@ -1077,14 +1076,14 @@ func TestDecrementFloat32(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("float32")
 	if !found {
 		t.Error("float32 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("float32 is not 3:", x)
 	}
 }
@@ -1096,14 +1095,14 @@ func TestDecrementFloat64(t *testing.T) {
 	if err != nil {
 		t.Error("Error decrementing:", err)
 	}
-	if *n != 3 {
+	if n != 3 {
 		t.Error("Returned number is not 3:", n)
 	}
 	x, found := tc.Get("float64")
 	if !found {
 		t.Error("float64 was not found")
 	}
-	if *x != 3 {
+	if x != 3 {
 		t.Error("float64 is not 3:", x)
 	}
 }
@@ -1165,15 +1164,15 @@ func TestFlush(t *testing.T) {
 	if found {
 		t.Error("foo was found, but it should have been deleted")
 	}
-	if x != nil {
-		t.Error("x is not nil:", x)
+	if x != "" {
+		t.Error("x is not empty:", x)
 	}
 	x, found = tc.Get("baz")
 	if found {
 		t.Error("baz was found, but it should have been deleted")
 	}
-	if x != nil {
-		t.Error("x is not nil:", x)
+	if x != "" {
+		t.Error("x is not empty:", x)
 	}
 }
 
@@ -1185,9 +1184,8 @@ func TestIncrementOverflowInt(t *testing.T) {
 		t.Error("Error incrementing int8:", err)
 	}
 	x, _ := tc.Get("int8")
-	i8 := *x
-	if i8 != -128 {
-		t.Error("int8 did not overflow as expected; value:", i8)
+	if x != -128 {
+		t.Error("int8 did not overflow as expected; value:", x)
 	}
 }
 
@@ -1199,9 +1197,8 @@ func TestIncrementOverflowUint(t *testing.T) {
 		t.Error("Error incrementing int8:", err)
 	}
 	x, _ := tc.Get("uint8")
-	ui8 := *x
-	if ui8 != 0 {
-		t.Error("uint8 did not overflow as expected; value:", ui8)
+	if x != 0 {
+		t.Error("uint8 did not overflow as expected; value:", x)
 	}
 }
 
@@ -1213,9 +1210,8 @@ func TestDecrementUnderflowUint(t *testing.T) {
 		t.Error("Error decrementing int8:", err)
 	}
 	x, _ := tc.Get("uint8")
-	ui8 := *x
-	if ui8 != 255 {
-		t.Error("uint8 did not underflow as expected; value:", ui8)
+	if x != 255 {
+		t.Error("uint8 did not underflow as expected; value:", x)
 	}
 }
 
@@ -1226,8 +1222,8 @@ func TestOnEvicted(t *testing.T) {
 		t.Fatal("tc.onEvicted is not nil")
 	}
 	works := false
-	tc.OnEvicted(func(k string, v *int) {
-		if k == "foo" && *v == 3 {
+	tc.OnEvicted(func(k string, v int) {
+		if k == "foo" && v == 3 {
 			works = true
 		}
 		tc.Set("bar", 4, DefaultExpiration)
@@ -1237,7 +1233,7 @@ func TestOnEvicted(t *testing.T) {
 	if !works {
 		t.Error("works bool not true")
 	}
-	if *x != 4 {
+	if x != 4 {
 		t.Error("bar was not 4")
 	}
 }
@@ -1524,7 +1520,7 @@ func TestGetWithExpiration(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for a is nil")
-	} else if a2 := (*x).(int); a2+2 != 3 {
+	} else if a2 := (x).(int); a2+2 != 3 {
 		t.Error("a2 (which should be 1) plus 2 does not equal 3; value:", a2)
 	}
 	if !expiration.IsZero() {
@@ -1537,7 +1533,7 @@ func TestGetWithExpiration(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for b is nil")
-	} else if b2 := (*x).(string); b2+"B" != "bB" {
+	} else if b2 := (x).(string); b2+"B" != "bB" {
 		t.Error("b2 (which should be b) plus B does not equal bB; value:", b2)
 	}
 	if !expiration.IsZero() {
@@ -1550,7 +1546,7 @@ func TestGetWithExpiration(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for c is nil")
-	} else if c2 := (*x).(float64); c2+1.2 != 4.7 {
+	} else if c2 := (x).(float64); c2+1.2 != 4.7 {
 		t.Error("c2 (which should be 3.5) plus 1.2 does not equal 4.7; value:", c2)
 	}
 	if !expiration.IsZero() {
@@ -1563,7 +1559,7 @@ func TestGetWithExpiration(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for d is nil")
-	} else if d2 := (*x).(int); d2+2 != 3 {
+	} else if d2 := (x).(int); d2+2 != 3 {
 		t.Error("d (which should be 1) plus 2 does not equal 3; value:", d2)
 	}
 	if !expiration.IsZero() {
@@ -1576,7 +1572,7 @@ func TestGetWithExpiration(t *testing.T) {
 	}
 	if x == nil {
 		t.Error("x for e is nil")
-	} else if e2 := (*x).(int); e2+2 != 3 {
+	} else if e2 := (x).(int); e2+2 != 3 {
 		t.Error("e (which should be 1) plus 2 does not equal 3; value:", e2)
 	}
 	if expiration.UnixNano() != tc.items["e"].Expiration {

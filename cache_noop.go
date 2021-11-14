@@ -36,16 +36,18 @@ func (c *NoopCache[T]) Replace(k string, x T, d time.Duration) error {
 
 // Get gets an item from the cache. Returns the item or nil, and a bool indicating
 // whether the key was found.
-func (c *NoopCache[T]) Get(k string) (*T, bool) {
-	return nil, false
+func (c *NoopCache[T]) Get(k string) (T, bool) {
+	var ret T
+	return ret, false
 }
 
 // GetWithExpiration returns an item and its expiration time from the cache.
 // It returns the item or nil, the expiration time if one is set (if the item
 // never expires a zero value for time.Time is returned), and a bool indicating
 // whether the key was found.
-func (c *NoopCache[T]) GetWithExpiration(k string) (*T, time.Time, bool) {
-	return nil, time.Time{}, false
+func (c *NoopCache[T]) GetWithExpiration(k string) (T, time.Time, bool) {
+	var ret T
+	return ret, time.Time{}, false
 }
 
 // Cache implements Cacher
@@ -58,8 +60,9 @@ type NoopNumericCache[T Numeric] struct {
 // item's value is not an integer, if it was not found, or if it is not
 // possible to increment it by n. To retrieve the incremented value, use one
 // of the specialized methods, e.g. IncrementInt64.
-func (c *NoopNumericCache[T]) Increment(k string, n T) (*T, error) {
-	return nil, fmt.Errorf("Item not found")
+func (c *NoopNumericCache[T]) Increment(k string, n T) (T, error) {
+	var ret T
+	return ret, fmt.Errorf("Item not found")
 }
 
 // Decrement decrements an item of type int, int8, int16, int32, int64, uintptr, uint,
@@ -67,8 +70,9 @@ func (c *NoopNumericCache[T]) Increment(k string, n T) (*T, error) {
 // item's value is not an integer, if it was not found, or if it is not
 // possible to decrement it by n. To retrieve the decremented value, use one
 // of the specialized methods, e.g. DecrementInt64.
-func (c *NoopNumericCache[T]) Decrement(k string, n T) (*T, error) {
-	return nil, fmt.Errorf("Item not found")
+func (c *NoopNumericCache[T]) Decrement(k string, n T) (T, error) {
+	var ret T
+	return ret, fmt.Errorf("Item not found")
 }
 
 // Delete deletes an item from the cache. Does nothing if the key is not in the cache.
@@ -92,7 +96,7 @@ func (c *NoopCache[T]) setJanitor(j *janitor[T]) {
 // OnEvicted sets an (optional) function that is called with the key and value when an
 // item is evicted from the cache. (Including when it is deleted manually, but
 // not when it is overwritten.) Set to nil to disable.
-func (c *NoopCache[T]) OnEvicted(f func(string, *T)) {
+func (c *NoopCache[T]) OnEvicted(f func(string, T)) {
 
 }
 
