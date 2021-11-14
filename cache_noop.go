@@ -5,9 +5,8 @@ import (
 	"time"
 )
 
-// Cache implements Cacher
-type NoopCache[T any] struct {
-}
+// Cache implements Cacher.
+type NoopCache[T any] struct{}
 
 // Set adds an item to the cache, replacing any existing item. If the duration is 0
 // (DefaultExpiration), the cache's default expiration time is used. If it is -1
@@ -85,14 +84,6 @@ func (c *NoopCache[T]) DeleteExpired() {
 
 }
 
-func (c *NoopCache[T]) stopJanitor() {
-
-}
-
-func (c *NoopCache[T]) setJanitor(j *janitor[T]) {
-
-}
-
 // OnEvicted sets an (optional) function that is called with the key and value when an
 // item is evicted from the cache. (Including when it is deleted manually, but
 // not when it is overwritten.) Set to nil to disable.
@@ -145,22 +136,23 @@ func NewNoopNumericCacher[T Numeric](defaultExpiration, cleanupInterval time.Dur
 	return NewNoopNumeric[T](defaultExpiration, cleanupInterval)
 }
 
-// NewNoopFrom returns a new *NoopCache[T] with a given default expiration duration and
+// NewNoopFrom returns a new *NoopCache[T] with a given default expiration duration
+// and cleanup interval.
 func NewNoopFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *NoopCache[T] {
 	return newNoopCache[T]()
 }
 
-// NewAnyCacherFrom returns a AnyCacher[T] interface
+// NewAnyCacherFrom returns a AnyCacher[T] interface.
 func NewNoopAnyCacherFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) AnyCacher[T] {
 	return NewNoopFrom(defaultExpiration, cleanupInterval, items)
 }
 
-// NewAnyCacherFrom returns a *NumericCache[T]
+// NewAnyCacherFrom returns a *NumericCache[T].
 func NewNoopNumericFrom[T Numeric](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *NoopNumericCache[T] {
 	return newNoopNumericCache[T]()
 }
 
-// NewAnyCacherFrom returns a NumericCacher[T] interface
+// NewAnyCacherFrom returns a NumericCacher[T] interface.
 func NewNoopNumericCacherFrom[T Numeric](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) NumericCacher[T] {
 	return NewNoopNumericFrom(defaultExpiration, cleanupInterval, items)
 }
