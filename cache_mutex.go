@@ -30,13 +30,13 @@ const (
 	DefaultExpiration time.Duration = 0
 )
 
-// Cache implements Cacher
-type Cache[T any] struct {
-	*cache[T]
+// AnyCache implements AnyCacher
+type AnyCache[T any] struct {
+	*anyCache[T]
 	// If this is confusing, see the comment at the bottom of New()
 }
 
-type cache[T any] struct {
+type anyCache[T any] struct {
 	defaultExpiration time.Duration
 	items             map[string]Item[T]
 	mu                sync.RWMutex
@@ -47,7 +47,7 @@ type cache[T any] struct {
 // Set adds an item to the cache, replacing any existing item. If the duration is 0
 // (DefaultExpiration), the cache's default expiration time is used. If it is -1
 // (NoExpiration), the item never expires.
-func (c *cache[T]) Set(k string, x T, d time.Duration) {
+func (c *anyCache[T]) Set(k string, x T, d time.Duration) {
 	// "Inlining" of set
 	var e int64
 
@@ -68,7 +68,7 @@ func (c *cache[T]) Set(k string, x T, d time.Duration) {
 	}
 }
 
-func (c *cache[T]) set(k string, x T, d time.Duration) {
+func (c *anyCache[T]) set(k string, x T, d time.Duration) {
 	var e int64
 
 	if d == DefaultExpiration {
@@ -87,13 +87,13 @@ func (c *cache[T]) set(k string, x T, d time.Duration) {
 
 // SetDefault adds an item to the cache, replacing any existing item, using the default
 // expiration.
-func (c *cache[T]) SetDefault(k string, x T) {
+func (c *anyCache[T]) SetDefault(k string, x T) {
 	c.Set(k, x, DefaultExpiration)
 }
 
 // Add an item to the cache only if an item doesn't already exist for the given
 // key, or if the existing item has expired. Returns an error otherwise.
-func (c *cache[T]) Add(k string, x T, d time.Duration) error {
+func (c *anyCache[T]) Add(k string, x T, d time.Duration) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -107,7 +107,7 @@ func (c *cache[T]) Add(k string, x T, d time.Duration) error {
 
 // Replace replaces a new value for the cache key only if it already exists, and the existing
 // item hasn't expired. Returns an error otherwise.
-func (c *cache[T]) Replace(k string, x T, d time.Duration) error {
+func (c *anyCache[T]) Replace(k string, x T, d time.Duration) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -121,7 +121,7 @@ func (c *cache[T]) Replace(k string, x T, d time.Duration) error {
 
 // Get gets an item from the cache. Returns the item or nil, and a bool indicating
 // whether the key was found.
-func (c *cache[T]) Get(k string) (T, bool) {
+func (c *anyCache[T]) Get(k string) (T, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -146,7 +146,7 @@ func (c *cache[T]) Get(k string) (T, bool) {
 // It returns the item or nil, the expiration time if one is set (if the item
 // never expires a zero value for time.Time is returned), and a bool indicating
 // whether the key was found.
-func (c *cache[T]) GetWithExpiration(k string) (T, time.Time, bool) {
+func (c *anyCache[T]) GetWithExpiration(k string) (T, time.Time, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -176,7 +176,7 @@ func (c *cache[T]) GetWithExpiration(k string) (T, time.Time, bool) {
 // key found and item not expired => (value, true)
 // key found and item expired     => (value, false)
 // key not found                  => (nil, false)
-func (c *cache[T]) get(k string) (T, bool) {
+func (c *anyCache[T]) get(k string) (T, bool) {
 	item, found := c.items[k]
 	if !found {
 		var ret T
@@ -191,14 +191,14 @@ func (c *cache[T]) get(k string) (T, bool) {
 	return item.Object, true
 }
 
-// Cache implements Cacher
+// AnyCache implements AnyCacher
 type NumericCache[T Numeric] struct {
 	*numericCache[T]
 	// If this is confusing, see the comment at the bottom of New()
 }
 
 type numericCache[T Numeric] struct {
-	*cache[T]
+	*anyCache[T]
 }
 
 // Increment increments an item of type int, int8, int16, int32, int64, uintptr, uint,
@@ -250,7 +250,7 @@ func (c *numericCache[T]) Decrement(k string, n T) (T, error) {
 }
 
 // Delete deletes an item from the cache. Does nothing if the key is not in the cache.
-func (c *cache[T]) Delete(k string) {
+func (c *anyCache[T]) Delete(k string) {
 	c.mu.Lock()
 	v, evicted := c.delete(k)
 	c.mu.Unlock()
@@ -260,7 +260,7 @@ func (c *cache[T]) Delete(k string) {
 	}
 }
 
-func (c *cache[T]) delete(k string) (T, bool) {
+func (c *anyCache[T]) delete(k string) (T, bool) {
 	var found = false
 	var ret T
 
@@ -279,7 +279,7 @@ type keyAndValue[T any] struct {
 }
 
 // DeleteExpired deletes all expired items from the cache.
-func (c *cache[T]) DeleteExpired() {
+func (c *anyCache[T]) DeleteExpired() {
 	var evictedItems []keyAndValue[T]
 	now := time.Now().UnixNano()
 	c.mu.Lock()
@@ -298,25 +298,25 @@ func (c *cache[T]) DeleteExpired() {
 	}
 }
 
-func (c *cache[T]) stopJanitor() {
+func (c *anyCache[T]) stopJanitor() {
 	c.janitor.stop <- true
 }
 
-func (c *cache[T]) setJanitor(j *janitor[T]) {
+func (c *anyCache[T]) setJanitor(j *janitor[T]) {
 	c.janitor = j
 }
 
 // OnEvicted sets an (optional) function that is called with the key and value when an
 // item is evicted from the cache. (Including when it is deleted manually, but
 // not when it is overwritten.) Set to nil to disable.
-func (c *cache[T]) OnEvicted(f func(string, T)) {
+func (c *anyCache[T]) OnEvicted(f func(string, T)) {
 	c.mu.Lock()
 	c.onEvicted = f
 	c.mu.Unlock()
 }
 
 // Items copies all unexpired items in the cache into a new map and returns it.
-func (c *cache[T]) Items() map[string]Item[T] {
+func (c *anyCache[T]) Items() map[string]Item[T] {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	m := make(map[string]Item[T], len(c.items))
@@ -335,7 +335,7 @@ func (c *cache[T]) Items() map[string]Item[T] {
 
 // ItemCount returns the number of items in the cache. This may include items that have
 // expired, but have not yet been cleaned up.
-func (c *cache[T]) ItemCount() int {
+func (c *anyCache[T]) ItemCount() int {
 	c.mu.RLock()
 	n := len(c.items)
 	c.mu.RUnlock()
@@ -343,7 +343,7 @@ func (c *cache[T]) ItemCount() int {
 }
 
 // Flush Delete all items from the cache.
-func (c *cache[T]) Flush() {
+func (c *anyCache[T]) Flush() {
 	c.mu.Lock()
 	c.items = map[string]Item[T]{}
 	c.mu.Unlock()
@@ -385,11 +385,11 @@ func runJanitor[T any](c cacherWithJanitor[T], ci time.Duration) {
 	go j.Run(c.(AnyCacher[T]))
 }
 
-func newCache[T any](de time.Duration, m map[string]Item[T]) *cache[T] {
+func newCache[T any](de time.Duration, m map[string]Item[T]) *anyCache[T] {
 	if de == 0 {
 		de = -1
 	}
-	c := &cache[T]{
+	c := &anyCache[T]{
 		defaultExpiration: de,
 		items:             m,
 	}
@@ -400,8 +400,7 @@ func newNumericCache[T Numeric](de time.Duration, m map[string]Item[T]) *numeric
 	if de == 0 {
 		de = -1
 	}
-
-	c := &cache[T]{
+	c := &anyCache[T]{
 		defaultExpiration: de,
 		items:             m,
 	}
@@ -409,14 +408,14 @@ func newNumericCache[T Numeric](de time.Duration, m map[string]Item[T]) *numeric
 	return nc
 }
 
-func newCacheWithJanitor[T any](de time.Duration, ci time.Duration, m map[string]Item[T]) *Cache[T] {
+func newCacheWithJanitor[T any](de time.Duration, ci time.Duration, m map[string]Item[T]) *AnyCache[T] {
 	c := newCache(de, m)
 	// This trick ensures that the janitor goroutine (which--granted it
 	// was enabled--is running DeleteExpired on c forever) does not keep
 	// the returned C object from being garbage collected. When it is
 	// garbage collected, the finalizer stops the janitor goroutine, after
 	// which c can be collected.
-	C := &Cache[T]{c}
+	C := &AnyCache[T]{c}
 	if ci > 0 {
 		runJanitor[T](c, ci)
 		runtime.SetFinalizer(C, stopJanitor[T])
@@ -440,34 +439,44 @@ func newNumericCacheWithJanitor[T Numeric](de time.Duration, ci time.Duration, m
 	return C
 }
 
-// New returns a new Cache[T] with a given default expiration duration and cleanup
-// interval. If the expiration duration is less than one (or NoExpiration),
+// New[T](...) is an alias for NewAny[T](...).
+func New[T any](defaultExpiration, cleanupInterval time.Duration) *AnyCache[T] {
+	return NewAny[T](defaultExpiration, cleanupInterval)
+}
+
+// NewAny[T any](...) returns a new AnyCache[T] with a given default expiration
+// duration and cleanup interval. If the expiration duration is less than one (or NoExpiration),
 // the items in the cache never expire (by default), and must be deleted
 // manually. If the cleanup interval is less than one, expired items are not
 // deleted from the cache before calling c.DeleteExpired().
-func New[T any](defaultExpiration, cleanupInterval time.Duration) *Cache[T] {
+func NewAny[T any](defaultExpiration, cleanupInterval time.Duration) *AnyCache[T] {
 	items := make(map[string]Item[T])
 	return newCacheWithJanitor(defaultExpiration, cleanupInterval, items)
 }
 
-// NewAnyCacher returns an AnyCacher[T] interface
+// NewAnyCacher[T any](...) returns an AnyCacher[T] interface.
 func NewAnyCacher[T any](defaultExpiration, cleanupInterval time.Duration) AnyCacher[T] {
 	return New[T](defaultExpiration, cleanupInterval)
 }
 
-// NewAnyCacher returns a *NumericCache[T]
+// NewNumeric[T Numeric](...) returns a *NumericCache[T].
 func NewNumeric[T Numeric](defaultExpiration, cleanupInterval time.Duration) *NumericCache[T] {
 	items := make(map[string]Item[T])
 	return newNumericCacheWithJanitor(defaultExpiration, cleanupInterval, items)
 }
 
-// NewCacher returns a NumericCacher[T] interface
+// NewNumericCacher[T Numeric](...) returns a NumericCacher[T] interface.
 func NewNumericCacher[T Numeric](defaultExpiration, cleanupInterval time.Duration) NumericCacher[T] {
 	return NewNumeric[T](defaultExpiration, cleanupInterval)
 }
 
-// NewFrom returns a new *Cache[T] with a given default expiration duration and
-// cleanup interval. If the expiration duration is less than one (or NoExpiration),
+// NewFrom[T any](...) is an alias for NewAnyFrom[T](...).
+func NewFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *AnyCache[T] {
+	return NewAnyFrom(defaultExpiration, cleanupInterval, items)
+}
+
+// NewAnyFrom[T any]()... returns a new *AnyCache[T] with a given default expiration
+// duration and cleanup interval. If the expiration duration is less than one (or NoExpiration),
 // the items in the cache never expire (by default), and must be deleted
 // manually. If the cleanup interval is less than one, expired items are not
 // deleted from the cache before calling c.DeleteExpired().
@@ -487,21 +496,21 @@ func NewNumericCacher[T Numeric](defaultExpiration, cleanupInterval time.Duratio
 // gob.Register() the individual types stored in the cache before encoding a
 // map retrieved with c.Items(), and to register those same types before
 // decoding a blob containing an items map.
-func NewFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *Cache[T] {
+func NewAnyFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *AnyCache[T] {
 	return newCacheWithJanitor(defaultExpiration, cleanupInterval, items)
 }
 
-// NewAnyCacherFrom returns a AnyCacher[T] interface
+// NewAnyCacherFrom[T any](...) returns a AnyCacher[T] interface.
 func NewAnyCacherFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) AnyCacher[T] {
 	return NewFrom(defaultExpiration, cleanupInterval, items)
 }
 
-// NewAnyCacherFrom returns a *NumericCache[T]
+// NewNumericFrom[T Numeric](...) returns a *NumericCache[T].
 func NewNumericFrom[T Numeric](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *NumericCache[T] {
 	return newNumericCacheWithJanitor(defaultExpiration, cleanupInterval, items)
 }
 
-// NewAnyCacherFrom returns a NumericCacher[T] interface
+// NewNumericCacherFrom[T Numeric](...) returns a NumericCacher[T] interface.
 func NewNumericCacherFrom[T Numeric](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) NumericCacher[T] {
 	return NewNumericFrom(defaultExpiration, cleanupInterval, items)
 }
