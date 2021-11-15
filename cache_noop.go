@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -61,7 +60,7 @@ type NoopNumericCache[T Numeric] struct {
 // of the specialized methods, e.g. IncrementInt64.
 func (c *NoopNumericCache[T]) Increment(k string, n T) (T, error) {
 	var ret T
-	return ret, fmt.Errorf("Item not found")
+	return ret, ErrNotFound
 }
 
 // Decrement decrements an item of type int, int8, int16, int32, int64, uintptr, uint,
@@ -71,7 +70,7 @@ func (c *NoopNumericCache[T]) Increment(k string, n T) (T, error) {
 // of the specialized methods, e.g. DecrementInt64.
 func (c *NoopNumericCache[T]) Decrement(k string, n T) (T, error) {
 	var ret T
-	return ret, fmt.Errorf("Item not found")
+	return ret, ErrNotFound
 }
 
 // Delete deletes an item from the cache. Does nothing if the key is not in the cache.

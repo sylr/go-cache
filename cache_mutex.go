@@ -214,7 +214,7 @@ func (c *numericCache[T]) Increment(k string, n T) (T, error) {
 
 	if !found || v.Expired() {
 		var ret T
-		return ret, fmt.Errorf("Item %s not found", k)
+		return ret, ErrNotFound
 	}
 
 	nv := v.Object + n
@@ -239,7 +239,7 @@ func (c *numericCache[T]) Decrement(k string, n T) (T, error) {
 
 	if !found || v.Expired() {
 		var ret T
-		return ret, fmt.Errorf("Item not found")
+		return ret, ErrNotFound
 	}
 
 	nv := v.Object - n

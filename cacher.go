@@ -2,7 +2,12 @@ package cache
 
 import (
 	"constraints"
+	"errors"
 	"time"
+)
+
+var (
+	ErrNotFound = errors.New("item not found")
 )
 
 type Numeric interface {
