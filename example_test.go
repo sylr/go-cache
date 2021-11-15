@@ -37,7 +37,7 @@ func ExampleAnyCache_any() {
 	// MySuperStruct
 }
 
-func ExampleAnyCache_string() {
+func ExampleAnyCacher_string() {
 	// Create a string cache with a default expiration time of 5 minutes.
 	c := cache.NewAnyCacher[string](5*time.Minute, 10*time.Minute)
 
@@ -55,7 +55,7 @@ func ExampleAnyCache_string() {
 	// MySuperString
 }
 
-func ExampleAnyCache_CustomStruct() {
+func ExampleAnyCacher_customStruct() {
 	// Create a cache with a default expiration time of 5 minutes, and which
 	c := cache.NewAnyCacher[*MyStruct](5*time.Minute, 10*time.Minute)
 
@@ -66,7 +66,7 @@ func ExampleAnyCache_CustomStruct() {
 	myCachedStruct, found := c.Get("MySuperStruct")
 
 	if found {
-		fmt.Printf("%s", myCachedStruct.Name)
+		fmt.Printf("%#v: %s", myCachedStruct, myCachedStruct.Name)
 	} else {
 		fmt.Printf("Error: MySuperStruct not found in cache")
 	}
@@ -77,11 +77,14 @@ func ExampleAnyCache_CustomStruct() {
 
 // -- NumericCache -------------------------------------------------------------
 
-func ExampleNumericCache_int8() {
+func ExampleNumericCacher_int8() {
 	// Create a float64 cache with a default expiration time of 5 minutes.
-	c := cache.NewAnyCacher[int8](5*time.Minute, 10*time.Minute)
+	c := cache.NewNumericCacher[int8](5*time.Minute, 10*time.Minute)
+	key := "universeAnswer"
 
-	c.Set("universeAnswer", 42, 0)
+	c.Set(key, 42, 0)
+	c.Increment(key, 1)
+	c.Decrement(key, 2)
 
 	universeAnswer, found := c.Get("universeAnswer")
 
@@ -97,11 +100,14 @@ func ExampleNumericCache_int8() {
 
 func ExampleNumericCache_float64() {
 	// Create a float64 cache with a default expiration time of 5 minutes.
-	c := cache.NewAnyCacher[float64](5*time.Minute, 10*time.Minute)
+	c := cache.NewNoopNumericCacher[float64](5*time.Minute, 10*time.Minute)
+	key := "universeAnswer"
 
-	c.Set("universeAnswer", 42.0, 0)
+	c.Set(key, 42.0, 0)
+	c.Increment(key, 1.0)
+	c.Decrement(key, 2.0)
 
-	universeAnswer, found := c.Get("universeAnswer")
+	universeAnswer, found := c.Get(key)
 
 	if found {
 		fmt.Printf("%.1f", universeAnswer)

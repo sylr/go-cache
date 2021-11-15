@@ -214,7 +214,7 @@ func (c *numericCache[T]) Increment(k string, n T) (T, error) {
 
 	if !found || v.Expired() {
 		var ret T
-		return ret, fmt.Errorf("Item %s not found", k)
+		return ret, fmt.Errorf("Item not found")
 	}
 
 	nv := v.Object + n
@@ -385,7 +385,7 @@ func runJanitor[T any](c cacherWithJanitor[T], ci time.Duration) {
 	go j.Run(c.(AnyCacher[T]))
 }
 
-func newCache[T any](de time.Duration, m map[string]Item[T]) *anyCache[T] {
+func newAnyCache[T any](de time.Duration, m map[string]Item[T]) *anyCache[T] {
 	if de == 0 {
 		de = -1
 	}
@@ -408,14 +408,15 @@ func newNumericCache[T Numeric](de time.Duration, m map[string]Item[T]) *numeric
 	return nc
 }
 
-func newCacheWithJanitor[T any](de time.Duration, ci time.Duration, m map[string]Item[T]) *AnyCache[T] {
-	c := newCache(de, m)
+func newAnyCacheWithJanitor[T any](de time.Duration, ci time.Duration, m map[string]Item[T]) *AnyCache[T] {
+	c := newAnyCache(de, m)
 	// This trick ensures that the janitor goroutine (which--granted it
 	// was enabled--is running DeleteExpired on c forever) does not keep
 	// the returned C object from being garbage collected. When it is
 	// garbage collected, the finalizer stops the janitor goroutine, after
 	// which c can be collected.
 	C := &AnyCache[T]{c}
+
 	if ci > 0 {
 		runJanitor[T](c, ci)
 		runtime.SetFinalizer(C, stopJanitor[T])
@@ -451,7 +452,7 @@ func New[T any](defaultExpiration, cleanupInterval time.Duration) *AnyCache[T] {
 // deleted from the cache before calling c.DeleteExpired().
 func NewAny[T any](defaultExpiration, cleanupInterval time.Duration) *AnyCache[T] {
 	items := make(map[string]Item[T])
-	return newCacheWithJanitor(defaultExpiration, cleanupInterval, items)
+	return newAnyCacheWithJanitor(defaultExpiration, cleanupInterval, items)
 }
 
 // NewAnyCacher[T any](...) returns an AnyCacher[T] interface.
@@ -497,7 +498,7 @@ func NewFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[
 // map retrieved with c.Items(), and to register those same types before
 // decoding a blob containing an items map.
 func NewAnyFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *AnyCache[T] {
-	return newCacheWithJanitor(defaultExpiration, cleanupInterval, items)
+	return newAnyCacheWithJanitor(defaultExpiration, cleanupInterval, items)
 }
 
 // NewAnyCacherFrom[T any](...) returns a AnyCacher[T] interface.
