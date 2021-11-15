@@ -1,10 +1,10 @@
 # go-cache
 
+[![Go Reference](https://pkg.go.dev/badge/sylr.dev/cache/v3.svg)](https://pkg.go.dev/sylr.dev/cache/v3)
+
 ## sylr.dev/cache fork disclaimer
 
 This module is a fork of [github.com/patrickmn/go-cache/](https://github.com/patrickmn/go-cache/).
-
-I forked it because it has been unmaintained for quite some time now.
 
 ## Synopsys
 
@@ -18,10 +18,14 @@ safely used by multiple goroutines.
 
 ### Installation
 
-`go get sylr.dev/cache/v3`
+```bash
+go get sylr.dev/cache/v3
+```
 
 ### Reference
 
-`godoc` or [http://pkg.go.dev/sylr.dev/cache/v3](http://pkg.go.dev/sylr.dev/cache/v3)
+The API reference can be found at [http://pkg.go.dev/sylr.dev/cache/v3](http://pkg.go.dev/sylr.dev/cache/v3).
+
+### Examples
 
 See [example_test.go](./example_test.go) for some usage examples.
