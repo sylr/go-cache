@@ -66,7 +66,7 @@ func ExampleAnyCacher_customStruct() {
 	myCachedStruct, found := c.Get("MySuperStruct")
 
 	if found {
-		fmt.Printf("%#v: %s", myCachedStruct, myCachedStruct.Name)
+		fmt.Printf("%s", myCachedStruct.Name)
 	} else {
 		fmt.Printf("Error: MySuperStruct not found in cache")
 	}
@@ -84,7 +84,7 @@ func ExampleNumericCacher_int8() {
 
 	c.Set(key, 42, 0)
 	c.Increment(key, 1)
-	c.Decrement(key, 2)
+	c.Decrement(key, 1)
 
 	universeAnswer, found := c.Get("universeAnswer")
 
@@ -100,19 +100,19 @@ func ExampleNumericCacher_int8() {
 
 func ExampleNumericCache_float64() {
 	// Create a float64 cache with a default expiration time of 5 minutes.
-	c := cache.NewNoopNumericCacher[float64](5*time.Minute, 10*time.Minute)
+	c := cache.NewNumericCacher[float64](5*time.Minute, 10*time.Minute)
 	key := "universeAnswer"
 
 	c.Set(key, 42.0, 0)
 	c.Increment(key, 1.0)
-	c.Decrement(key, 2.0)
+	c.Decrement(key, 1.0)
 
 	universeAnswer, found := c.Get(key)
 
 	if found {
 		fmt.Printf("%.1f", universeAnswer)
 	} else {
-		fmt.Printf("Error: universeAnswer not found in cache")
+		fmt.Printf("Error: %s not found in cache", key)
 	}
 
 	// Output:
