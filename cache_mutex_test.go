@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"math/rand"
 	"runtime"
 	"strconv"
 	"sync"
@@ -1235,6 +1236,146 @@ func TestOnEvicted(t *testing.T) {
 	}
 	if x != 4 {
 		t.Error("bar was not 4")
+	}
+}
+
+func TestFinalizerNew(t *testing.T) {
+	initNnGoRoutines := runtime.NumGoroutine()
+	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+
+	rand.Seed(time.Now().UTC().UnixNano())
+	for i := 0; i < 5+rand.Intn(15); i++ {
+		// Scope the creation of the Cache so it gets deleted by the GC at the end
+		// of the scope.
+		func() {
+			tc := New[string](time.Second, time.Second)
+			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
+			tc.SetDefault("pwet", "pwet")
+		}()
+	}
+
+	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
+
+	runtime.GC()
+
+	time.Sleep(50 * time.Millisecond)
+	currentNbGoRoutines := runtime.NumGoroutine()
+	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
+
+	if initNnGoRoutines != currentNbGoRoutines {
+		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
+	}
+}
+
+func TestFinalizerNewAny(t *testing.T) {
+	initNnGoRoutines := runtime.NumGoroutine()
+	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+
+	rand.Seed(time.Now().UTC().UnixNano())
+	for i := 0; i < 5+rand.Intn(15); i++ {
+		// Scope the creation of the Cache so it gets deleted by the GC at the end
+		// of the scope.
+		func() {
+			tc := NewAny[string](time.Second, time.Second)
+			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
+			tc.SetDefault("pwet", "pwet")
+		}()
+	}
+
+	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
+
+	runtime.GC()
+
+	time.Sleep(50 * time.Millisecond)
+	currentNbGoRoutines := runtime.NumGoroutine()
+	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
+
+	if initNnGoRoutines != currentNbGoRoutines {
+		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
+	}
+}
+
+func TestFinalizerNewAnyCacher(t *testing.T) {
+	initNnGoRoutines := runtime.NumGoroutine()
+	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+
+	rand.Seed(time.Now().UTC().UnixNano())
+	for i := 0; i < 5+rand.Intn(15); i++ {
+		// Scope the creation of the Cache so it gets deleted by the GC at the end
+		// of the scope.
+		func() {
+			tc := NewAnyCacher[string](time.Second, time.Second)
+			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
+			tc.SetDefault("pwet", "pwet")
+		}()
+	}
+
+	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
+
+	runtime.GC()
+
+	time.Sleep(50 * time.Millisecond)
+	currentNbGoRoutines := runtime.NumGoroutine()
+	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
+
+	if initNnGoRoutines != currentNbGoRoutines {
+		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
+	}
+}
+
+func TestFinalizerNewNumeric(t *testing.T) {
+	initNnGoRoutines := runtime.NumGoroutine()
+	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+
+	rand.Seed(time.Now().UTC().UnixNano())
+	for i := 0; i < 5+rand.Intn(15); i++ {
+		// Scope the creation of the Cache so it gets deleted by the GC at the end
+		// of the scope.
+		func() {
+			tc := NewNumeric[int](time.Second, time.Second)
+			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
+			tc.SetDefault("pwet", 42)
+		}()
+	}
+
+	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
+
+	runtime.GC()
+
+	time.Sleep(50 * time.Millisecond)
+	currentNbGoRoutines := runtime.NumGoroutine()
+	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
+
+	if initNnGoRoutines != currentNbGoRoutines {
+		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
+	}
+}
+
+func TestFinalizerNewNumericCacher(t *testing.T) {
+	initNnGoRoutines := runtime.NumGoroutine()
+	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+
+	rand.Seed(time.Now().UTC().UnixNano())
+	for i := 0; i < 5+rand.Intn(15); i++ {
+		// Scope the creation of the Cache so it gets deleted by the GC at the end
+		// of the scope.
+		func() {
+			tc := NewNumericCacher[int](time.Second, time.Second)
+			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
+			tc.SetDefault("pwet", 42)
+		}()
+	}
+
+	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
+
+	runtime.GC()
+
+	time.Sleep(50 * time.Millisecond)
+	currentNbGoRoutines := runtime.NumGoroutine()
+	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
+
+	if initNnGoRoutines != currentNbGoRoutines {
+		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
 	}
 }
 
