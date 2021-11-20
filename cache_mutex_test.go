@@ -7,6 +7,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"go.uber.org/goleak"
 )
 
 type TestStruct struct {
@@ -1240,8 +1242,7 @@ func TestOnEvicted(t *testing.T) {
 }
 
 func TestFinalizerNew(t *testing.T) {
-	initNnGoRoutines := runtime.NumGoroutine()
-	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+	defer goleak.VerifyNone(t)
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1249,27 +1250,13 @@ func TestFinalizerNew(t *testing.T) {
 		// of the scope.
 		func() {
 			tc := New[string](time.Second, time.Second)
-			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
 			tc.SetDefault("pwet", "pwet")
 		}()
-	}
-
-	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
-
-	runtime.GC()
-
-	time.Sleep(50 * time.Millisecond)
-	currentNbGoRoutines := runtime.NumGoroutine()
-	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
-
-	if initNnGoRoutines != currentNbGoRoutines {
-		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
 	}
 }
 
 func TestFinalizerNewAny(t *testing.T) {
-	initNnGoRoutines := runtime.NumGoroutine()
-	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+	defer goleak.VerifyNone(t)
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1277,27 +1264,13 @@ func TestFinalizerNewAny(t *testing.T) {
 		// of the scope.
 		func() {
 			tc := NewAny[string](time.Second, time.Second)
-			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
 			tc.SetDefault("pwet", "pwet")
 		}()
-	}
-
-	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
-
-	runtime.GC()
-
-	time.Sleep(50 * time.Millisecond)
-	currentNbGoRoutines := runtime.NumGoroutine()
-	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
-
-	if initNnGoRoutines != currentNbGoRoutines {
-		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
 	}
 }
 
 func TestFinalizerNewAnyCacher(t *testing.T) {
-	initNnGoRoutines := runtime.NumGoroutine()
-	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+	defer goleak.VerifyNone(t)
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1305,21 +1278,8 @@ func TestFinalizerNewAnyCacher(t *testing.T) {
 		// of the scope.
 		func() {
 			tc := NewAnyCacher[string](time.Second, time.Second)
-			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
 			tc.SetDefault("pwet", "pwet")
 		}()
-	}
-
-	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
-
-	runtime.GC()
-
-	time.Sleep(50 * time.Millisecond)
-	currentNbGoRoutines := runtime.NumGoroutine()
-	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
-
-	if initNnGoRoutines != currentNbGoRoutines {
-		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
 	}
 }
 
