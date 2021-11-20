@@ -1,55 +1,56 @@
 package cache
 
 import (
-	"fmt"
-	"io"
 	"time"
 )
 
-// NoopCache implements Cacher
-type NoopCache struct {
-	*noopCache
-	// If this is confusing, see the comment at the bottom of New()
-}
-
-type noopCache struct {
-}
+// Cache implements Cacher.
+type NoopCache[T any] struct{}
 
 // Set adds an item to the cache, replacing any existing item. If the duration is 0
 // (DefaultExpiration), the cache's default expiration time is used. If it is -1
 // (NoExpiration), the item never expires.
-func (c *noopCache) Set(k string, x interface{}, d time.Duration) {
+func (c *NoopCache[T]) Set(k string, x T, d time.Duration) {
+
 }
 
 // SetDefault adds an item to the cache, replacing any existing item, using the default
 // expiration.
-func (c *noopCache) SetDefault(k string, x interface{}) {
+func (c *NoopCache[T]) SetDefault(k string, x T) {
+
 }
 
 // Add an item to the cache only if an item doesn't already exist for the given
 // key, or if the existing item has expired. Returns an error otherwise.
-func (c *noopCache) Add(k string, x interface{}, d time.Duration) error {
+func (c *NoopCache[T]) Add(k string, x T, d time.Duration) error {
 	return nil
 }
 
 // Replace replaces a new value for the cache key only if it already exists, and the existing
 // item hasn't expired. Returns an error otherwise.
-func (c *noopCache) Replace(k string, x interface{}, d time.Duration) error {
+func (c *NoopCache[T]) Replace(k string, x T, d time.Duration) error {
 	return nil
 }
 
 // Get gets an item from the cache. Returns the item or nil, and a bool indicating
 // whether the key was found.
-func (c *noopCache) Get(k string) (interface{}, bool) {
-	return nil, false
+func (c *NoopCache[T]) Get(k string) (T, bool) {
+	var ret T
+	return ret, false
 }
 
 // GetWithExpiration returns an item and its expiration time from the cache.
 // It returns the item or nil, the expiration time if one is set (if the item
 // never expires a zero value for time.Time is returned), and a bool indicating
 // whether the key was found.
-func (c *noopCache) GetWithExpiration(k string) (interface{}, time.Time, bool) {
-	return nil, time.Time{}, false
+func (c *NoopCache[T]) GetWithExpiration(k string) (T, time.Time, bool) {
+	var ret T
+	return ret, time.Time{}, false
+}
+
+// Cache implements Cacher
+type NoopNumericCache[T Numeric] struct {
+	NoopCache[T]
 }
 
 // Increment increments an item of type int, int8, int16, int32, int64, uintptr, uint,
@@ -57,108 +58,9 @@ func (c *noopCache) GetWithExpiration(k string) (interface{}, time.Time, bool) {
 // item's value is not an integer, if it was not found, or if it is not
 // possible to increment it by n. To retrieve the incremented value, use one
 // of the specialized methods, e.g. IncrementInt64.
-func (c *noopCache) Increment(k string, n int64) error {
-	return nil
-}
-
-// IncrementFloat increments an item of type float32 or float64 by n. Returns an error if the
-// item's value is not floating point, if it was not found, or if it is not
-// possible to increment it by n. Pass a negative number to decrement the
-// value. To retrieve the incremented value, use one of the specialized methods,
-// e.g. IncrementFloat64.
-func (c *noopCache) IncrementFloat(k string, n float64) error {
-	return nil
-}
-
-// IncrementInt increments an item of type int by n. Returns an error if the item's value is
-// not an int, or if it was not found. If there is no error, the incremented
-// value is returned.
-func (c *noopCache) IncrementInt(k string, n int) (int, error) {
-	return 0, nil
-}
-
-// IncrementInt8 increments an item of type int8 by n. Returns an error if the item's value is
-// not an int8, or if it was not found. If there is no error, the incremented
-// value is returned.
-func (c *noopCache) IncrementInt8(k string, n int8) (int8, error) {
-	return 0, nil
-}
-
-// IncrementInt16 increments an item of type int16 by n. Returns an error if the item's value is
-// not an int16, or if it was not found. If there is no error, the incremented
-// value is returned.
-func (c *noopCache) IncrementInt16(k string, n int16) (int16, error) {
-	return 0, nil
-}
-
-// IncrementInt32 increments an item of type int32 by n. Returns an error if the item's value is
-// not an int32, or if it was not found. If there is no error, the incremented
-// value is returned.
-func (c *noopCache) IncrementInt32(k string, n int32) (int32, error) {
-	return 0, nil
-}
-
-// IncrementInt64 increments an item of type int64 by n. Returns an error if the item's value is
-// not an int64, or if it was not found. If there is no error, the incremented
-// value is returned.
-func (c *noopCache) IncrementInt64(k string, n int64) (int64, error) {
-	return 0, nil
-}
-
-// IncrementUint increments an item of type uint by n. Returns an error if the item's value is
-// not an uint, or if it was not found. If there is no error, the incremented
-// value is returned.
-func (c *noopCache) IncrementUint(k string, n uint) (uint, error) {
-	return 0, nil
-}
-
-// IncrementUintptr increments an item of type uintptr by n. Returns an error if the item's value
-// is not an uintptr, or if it was not found. If there is no error, the
-// incremented value is returned.
-func (c *noopCache) IncrementUintptr(k string, n uintptr) (uintptr, error) {
-	return 0, nil
-}
-
-// IncrementUint8 increments an item of type uint8 by n. Returns an error if the item's value
-// is not an uint8, or if it was not found. If there is no error, the
-// incremented value is returned.
-func (c *noopCache) IncrementUint8(k string, n uint8) (uint8, error) {
-	return 0, nil
-}
-
-// IncrementUint16 increments an item of type uint16 by n. Returns an error if the item's value
-// is not an uint16, or if it was not found. If there is no error, the
-// incremented value is returned.
-func (c *noopCache) IncrementUint16(k string, n uint16) (uint16, error) {
-	return 0, nil
-}
-
-// IncrementUint32 increments an item of type uint32 by n. Returns an error if the item's value
-// is not an uint32, or if it was not found. If there is no error, the
-// incremented value is returned.
-func (c *noopCache) IncrementUint32(k string, n uint32) (uint32, error) {
-	return 0, nil
-}
-
-// IncrementUint64 increments an item of type uint64 by n. Returns an error if the item's value
-// is not an uint64, or if it was not found. If there is no error, the
-// incremented value is returned.
-func (c *noopCache) IncrementUint64(k string, n uint64) (uint64, error) {
-	return 0, nil
-}
-
-// IncrementFloat32 increments an item of type float32 by n. Returns an error if the item's value
-// is not an float32, or if it was not found. If there is no error, the
-// incremented value is returned.
-func (c *noopCache) IncrementFloat32(k string, n float32) (float32, error) {
-	return 0, nil
-}
-
-// IncrementFloat64 increments an item of type float64 by n. Returns an error if the item's value
-// is not an float64, or if it was not found. If there is no error, the
-// incremented value is returned.
-func (c *noopCache) IncrementFloat64(k string, n float64) (float64, error) {
-	return 0, nil
+func (c *NoopNumericCache[T]) Increment(k string, n T) (T, error) {
+	var ret T
+	return ret, ErrNotFound
 }
 
 // Decrement decrements an item of type int, int8, int16, int32, int64, uintptr, uint,
@@ -166,221 +68,90 @@ func (c *noopCache) IncrementFloat64(k string, n float64) (float64, error) {
 // item's value is not an integer, if it was not found, or if it is not
 // possible to decrement it by n. To retrieve the decremented value, use one
 // of the specialized methods, e.g. DecrementInt64.
-func (c *noopCache) Decrement(k string, n int64) error {
-	return fmt.Errorf("Item not found")
-}
-
-// DecrementFloat decrements an item of type float32 or float64 by n. Returns an error if the
-// item's value is not floating point, if it was not found, or if it is not
-// possible to decrement it by n. Pass a negative number to decrement the
-// value. To retrieve the decremented value, use one of the specialized methods,
-// e.g. DecrementFloat64.
-func (c *noopCache) DecrementFloat(k string, n float64) error {
-	return nil
-}
-
-// DecrementInt decrements an item of type int by n. Returns an error if the item's value is
-// not an int, or if it was not found. If there is no error, the decremented
-// value is returned.
-func (c *noopCache) DecrementInt(k string, n int) (int, error) {
-	return 0, nil
-}
-
-// DecrementInt8 decrements an item of type int8 by n. Returns an error if the item's value is
-// not an int8, or if it was not found. If there is no error, the decremented
-// value is returned.
-func (c *noopCache) DecrementInt8(k string, n int8) (int8, error) {
-	return 0, nil
-}
-
-// DecrementInt16 decrements an item of type int16 by n. Returns an error if the item's value is
-// not an int16, or if it was not found. If there is no error, the decremented
-// value is returned.
-func (c *noopCache) DecrementInt16(k string, n int16) (int16, error) {
-	return 0, nil
-}
-
-// DecrementInt32 decrements an item of type int32 by n. Returns an error if the item's value is
-// not an int32, or if it was not found. If there is no error, the decremented
-// value is returned.
-func (c *noopCache) DecrementInt32(k string, n int32) (int32, error) {
-	return 0, nil
-}
-
-// DecrementInt64 decrements an item of type int64 by n. Returns an error if the item's value is
-// not an int64, or if it was not found. If there is no error, the decremented
-// value is returned.
-func (c *noopCache) DecrementInt64(k string, n int64) (int64, error) {
-	return 0, nil
-}
-
-// DecrementUint decrements an item of type uint by n. Returns an error if the item's value is
-// not an uint, or if it was not found. If there is no error, the decremented
-// value is returned.
-func (c *noopCache) DecrementUint(k string, n uint) (uint, error) {
-	return 0, nil
-}
-
-// DecrementUintptr decrements an item of type uintptr by n. Returns an error if the item's value
-// is not an uintptr, or if it was not found. If there is no error, the
-// decremented value is returned.
-func (c *noopCache) DecrementUintptr(k string, n uintptr) (uintptr, error) {
-	return 0, nil
-}
-
-// DecrementUint8 decrements an item of type uint8 by n. Returns an error if the item's value is
-// not an uint8, or if it was not found. If there is no error, the decremented
-// value is returned.
-func (c *noopCache) DecrementUint8(k string, n uint8) (uint8, error) {
-	return 0, nil
-}
-
-// DecrementUint16 decrements an item of type uint16 by n. Returns an error if the item's value
-// is not an uint16, or if it was not found. If there is no error, the
-// decremented value is returned.
-func (c *noopCache) DecrementUint16(k string, n uint16) (uint16, error) {
-	return 0, nil
-}
-
-// DecrementUint32 decrements an item of type uint32 by n. Returns an error if the item's value
-// is not an uint32, or if it was not found. If there is no error, the
-// decremented value is returned.
-func (c *noopCache) DecrementUint32(k string, n uint32) (uint32, error) {
-	return 0, nil
-}
-
-// DecrementUint64 decrements an item of type uint64 by n. Returns an error if the item's value
-// is not an uint64, or if it was not found. If there is no error, the
-// decremented value is returned.
-func (c *noopCache) DecrementUint64(k string, n uint64) (uint64, error) {
-	return 0, nil
-}
-
-// DecrementFloat32 decrements an item of type float32 by n. Returns an error if the item's value
-// is not an float32, or if it was not found. If there is no error, the
-// decremented value is returned.
-func (c *noopCache) DecrementFloat32(k string, n float32) (float32, error) {
-	return 0, nil
-}
-
-// DecrementFloat64 decrements an item of type float64 by n. Returns an error if the item's value
-// is not an float64, or if it was not found. If there is no error, the
-// decremented value is returned.
-func (c *noopCache) DecrementFloat64(k string, n float64) (float64, error) {
-	return 0, nil
+func (c *NoopNumericCache[T]) Decrement(k string, n T) (T, error) {
+	var ret T
+	return ret, ErrNotFound
 }
 
 // Delete deletes an item from the cache. Does nothing if the key is not in the cache.
-func (c *noopCache) Delete(k string) {
+func (c *NoopCache[T]) Delete(k string) {
+
 }
 
 // DeleteExpired deletes all expired items from the cache.
-func (c *noopCache) DeleteExpired() {
+func (c *NoopCache[T]) DeleteExpired() {
+
 }
 
 // OnEvicted sets an (optional) function that is called with the key and value when an
 // item is evicted from the cache. (Including when it is deleted manually, but
 // not when it is overwritten.) Set to nil to disable.
-func (c *noopCache) OnEvicted(f func(string, interface{})) {
-}
+func (c *NoopCache[T]) OnEvicted(f func(string, T)) {
 
-// Save writes the cache's items (using Gob) to an io.Writer.
-//
-// NOTE: This method is deprecated in favor of c.Items() and NewFrom() (see the
-// documentation for NewFrom().)
-func (c *noopCache) Save(w io.Writer) (err error) {
-	return nil
-}
-
-// SaveFile saves the cache's items to the given filename, creating the file if it
-// doesn't exist, and overwriting it if it does.
-//
-// NOTE: This method is deprecated in favor of c.Items() and NewFrom() (see the
-// documentation for NewFrom().)
-func (c *noopCache) SaveFile(fname string) error {
-	return nil
-}
-
-// Load adds (Gob-serialized) cache items from an io.Reader, excluding any items with
-// keys that already exist (and haven't expired) in the current cache.
-//
-// NOTE: This method is deprecated in favor of c.Items() and NewFrom() (see the
-// documentation for NewFrom().)
-func (c *noopCache) Load(r io.Reader) error {
-	return nil
-}
-
-// LoadFile loads and adds cache items from the given filename, excluding any items with
-// keys that already exist in the current cache.
-//
-// NOTE: This method is deprecated in favor of c.Items() and NewFrom() (see the
-// documentation for NewFrom().)
-func (c *noopCache) LoadFile(fname string) error {
-	return nil
 }
 
 // Items copies all unexpired items in the cache into a new map and returns it.
-func (c *noopCache) Items() map[string]Item {
-	m := make(map[string]Item)
+func (c *NoopCache[T]) Items() map[string]Item[T] {
+	m := make(map[string]Item[T], 0)
 	return m
 }
 
 // ItemCount returns the number of items in the cache. This may include items that have
 // expired, but have not yet been cleaned up.
-func (c *noopCache) ItemCount() int {
+func (c *NoopCache[T]) ItemCount() int {
 	return 0
 }
 
 // Flush Delete all items from the cache.
-func (c *noopCache) Flush() {
+func (c *NoopCache[T]) Flush() {
+
 }
 
-func newNoopCache() *NoopCache {
-	c := &noopCache{}
-	C := &NoopCache{c}
-	return C
+func newNoopCache[T any]() *NoopCache[T] {
+	return &NoopCache[T]{}
 }
 
-// NewNoop returns a new cache with a given default expiration duration and cleanup
-// interval. If the expiration duration is less than one (or NoExpiration),
-// the items in the cache never expire (by default), and must be deleted
-// manually. If the cleanup interval is less than one, expired items are not
-// deleted from the cache before calling c.DeleteExpired().
-func NewNoop(defaultExpiration, cleanupInterval time.Duration) *NoopCache {
-	return newNoopCache()
+func newNoopNumericCache[T Numeric]() *NoopNumericCache[T] {
+	return &NoopNumericCache[T]{}
 }
 
-// NewNoopCacher returns a Cacher interface implementing NoopCache
-func NewNoopCacher(defaultExpiration, cleanupInterval time.Duration) Cacher {
-	return newNoopCache()
+// New returns a new NoopCache[T]
+func NewNoop[T any](defaultExpiration, cleanupInterval time.Duration) *NoopCache[T] {
+	return newNoopCache[T]()
 }
 
-// NewNoopFrom returns a new cache with a given default expiration duration and cleanup
-// interval. If the expiration duration is less than one (or NoExpiration),
-// the items in the cache never expire (by default), and must be deleted
-// manually. If the cleanup interval is less than one, expired items are not
-// deleted from the cache before calling c.DeleteExpired().
-//
-// NewFrom() also accepts an items map which will serve as the underlying map
-// for the cache. This is useful for starting from a deserialized cache
-// (serialized using e.g. gob.Encode() on c.Items()), or passing in e.g.
-// make(map[string]Item, 500) to improve startup performance when the cache
-// is expected to reach a certain minimum size.
-//
-// Only the cache's methods synchronize access to this map, so it is not
-// recommended to keep any references to the map around after creating a cache.
-// If need be, the map can be accessed at a later point using c.Items() (subject
-// to the same caveat.)
-//
-// Note regarding serialization: When using e.g. gob, make sure to
-// gob.Register() the individual types stored in the cache before encoding a
-// map retrieved with c.Items(), and to register those same types before
-// decoding a blob containing an items map.
-func NewNoopFrom(defaultExpiration, cleanupInterval time.Duration, items map[string]Item) *NoopCache {
-	return newNoopCache()
+// NewAnyCacher returns an AnyCacher[T] interface
+func NewNoopAnyCacher[T any](defaultExpiration, cleanupInterval time.Duration) AnyCacher[T] {
+	return NewNoop[T](defaultExpiration, cleanupInterval)
 }
 
-// NewNoopCacherFrom returns a Cacher interface implementing NoopCache
-func NewNoopCacherFrom(defaultExpiration, cleanupInterval time.Duration, items map[string]Item) Cacher {
+// NewAnyCacher returns a *NoopNumericCache[T]
+func NewNoopNumeric[T Numeric](defaultExpiration, cleanupInterval time.Duration) *NoopNumericCache[T] {
+	return newNoopNumericCache[T]()
+}
+
+// NewCacher returns a NumericCacher[T] interface
+func NewNoopNumericCacher[T Numeric](defaultExpiration, cleanupInterval time.Duration) NumericCacher[T] {
+	return NewNoopNumeric[T](defaultExpiration, cleanupInterval)
+}
+
+// NewNoopFrom returns a new *NoopCache[T] with a given default expiration duration
+// and cleanup interval.
+func NewNoopFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *NoopCache[T] {
+	return newNoopCache[T]()
+}
+
+// NewAnyCacherFrom returns a AnyCacher[T] interface.
+func NewNoopAnyCacherFrom[T any](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) AnyCacher[T] {
 	return NewNoopFrom(defaultExpiration, cleanupInterval, items)
+}
+
+// NewAnyCacherFrom returns a *NumericCache[T].
+func NewNoopNumericFrom[T Numeric](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) *NoopNumericCache[T] {
+	return newNoopNumericCache[T]()
+}
+
+// NewAnyCacherFrom returns a NumericCacher[T] interface.
+func NewNoopNumericCacherFrom[T Numeric](defaultExpiration, cleanupInterval time.Duration, items map[string]Item[T]) NumericCacher[T] {
+	return NewNoopNumericFrom(defaultExpiration, cleanupInterval, items)
 }

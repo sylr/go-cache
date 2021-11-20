@@ -33,7 +33,7 @@ lint: $(GO_TOOLS_GOLANGCI_LINT)
 tools: $(GO_TOOLS_GOLANGCI_LINT)
 
 $(GO_TOOLS_GOLANGCI_LINT):
-	GO111MODULE=on $(GO) get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
+	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 
 # -- $(GO) mod --------------------------------------------------------------------
