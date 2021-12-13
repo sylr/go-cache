@@ -1253,6 +1253,9 @@ func TestFinalizerNew(t *testing.T) {
 			tc.SetDefault("pwet", "pwet")
 		}()
 	}
+
+	// Force gc before verifying there are no leaked goroutines
+	runtime.GC()
 }
 
 func TestFinalizerNewAny(t *testing.T) {
@@ -1267,6 +1270,9 @@ func TestFinalizerNewAny(t *testing.T) {
 			tc.SetDefault("pwet", "pwet")
 		}()
 	}
+
+	// Force gc before verifying there are no leaked goroutines
+	runtime.GC()
 }
 
 func TestFinalizerNewAnyCacher(t *testing.T) {
@@ -1281,11 +1287,13 @@ func TestFinalizerNewAnyCacher(t *testing.T) {
 			tc.SetDefault("pwet", "pwet")
 		}()
 	}
+
+	// Force gc before verifying there are no leaked goroutines
+	runtime.GC()
 }
 
 func TestFinalizerNewNumeric(t *testing.T) {
-	initNnGoRoutines := runtime.NumGoroutine()
-	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+	defer goleak.VerifyNone(t)
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1293,27 +1301,16 @@ func TestFinalizerNewNumeric(t *testing.T) {
 		// of the scope.
 		func() {
 			tc := NewNumeric[int](time.Second, time.Second)
-			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
 			tc.SetDefault("pwet", 42)
 		}()
 	}
 
-	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
-
+	// Force gc before verifying there are no leaked goroutines
 	runtime.GC()
-
-	time.Sleep(50 * time.Millisecond)
-	currentNbGoRoutines := runtime.NumGoroutine()
-	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
-
-	if initNnGoRoutines != currentNbGoRoutines {
-		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
-	}
 }
 
 func TestFinalizerNewNumericCacher(t *testing.T) {
-	initNnGoRoutines := runtime.NumGoroutine()
-	t.Logf("Init number of goroutines: %d", initNnGoRoutines)
+	defer goleak.VerifyNone(t)
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1321,22 +1318,12 @@ func TestFinalizerNewNumericCacher(t *testing.T) {
 		// of the scope.
 		func() {
 			tc := NewNumericCacher[int](time.Second, time.Second)
-			t.Logf("Number of goroutines after creating cache #%d: %d", i, runtime.NumGoroutine())
 			tc.SetDefault("pwet", 42)
 		}()
 	}
 
-	t.Logf("Number of goroutines after all cache scopes are done: %d", runtime.NumGoroutine())
-
+	// Force gc before verifying there are no leaked goroutines
 	runtime.GC()
-
-	time.Sleep(50 * time.Millisecond)
-	currentNbGoRoutines := runtime.NumGoroutine()
-	t.Logf("Number of goroutines after running GC: %d", currentNbGoRoutines)
-
-	if initNnGoRoutines != currentNbGoRoutines {
-		t.Errorf("We expected to have as many goroutines as we started (%d) but have %d", initNnGoRoutines, currentNbGoRoutines)
-	}
 }
 
 func BenchmarkCacheGetExpiring(b *testing.B) {
