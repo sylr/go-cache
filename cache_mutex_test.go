@@ -1326,6 +1326,27 @@ func TestFinalizerNewNumericCacher(t *testing.T) {
 	runtime.GC()
 }
 
+func FuzzAddSetString(f *testing.F) {
+	f.Add("foo", "bar")
+	f.Add("foo", "baz")
+	f.Add("3", "foo")
+
+	tc := New[string](time.Second, 2*time.Second)
+	f.Fuzz(func(t *testing.T, key string, val string) {
+		err := tc.Add(key, val, DefaultExpiration)
+		if err != nil {
+			tc.Set(key, val, DefaultExpiration)
+		}
+		get, found := tc.Get(key)
+		if !found {
+			t.Errorf("key `%s` not found", key)
+		}
+		if get != val {
+			t.Errorf("key `%s` value `%s` should be `%s`", key, get, val)
+		}
+	})
+}
+
 func BenchmarkCacheGetExpiring(b *testing.B) {
 	benchmarkCacheGet(b, 5*time.Minute)
 }
