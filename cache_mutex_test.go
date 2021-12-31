@@ -1243,6 +1243,7 @@ func TestOnEvicted(t *testing.T) {
 
 func TestFinalizerNew(t *testing.T) {
 	defer goleak.VerifyNone(t)
+	defer runtime.GC() // Force gc before verifying there are no leaked goroutines
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1253,13 +1254,11 @@ func TestFinalizerNew(t *testing.T) {
 			tc.SetDefault("pwet", "pwet")
 		}()
 	}
-
-	// Force gc before verifying there are no leaked goroutines
-	runtime.GC()
 }
 
 func TestFinalizerNewAny(t *testing.T) {
 	defer goleak.VerifyNone(t)
+	defer runtime.GC() // Force gc before verifying there are no leaked goroutines
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1270,13 +1269,11 @@ func TestFinalizerNewAny(t *testing.T) {
 			tc.SetDefault("pwet", "pwet")
 		}()
 	}
-
-	// Force gc before verifying there are no leaked goroutines
-	runtime.GC()
 }
 
 func TestFinalizerNewAnyCacher(t *testing.T) {
 	defer goleak.VerifyNone(t)
+	defer runtime.GC() // Force gc before verifying there are no leaked goroutines
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1287,13 +1284,11 @@ func TestFinalizerNewAnyCacher(t *testing.T) {
 			tc.SetDefault("pwet", "pwet")
 		}()
 	}
-
-	// Force gc before verifying there are no leaked goroutines
-	runtime.GC()
 }
 
 func TestFinalizerNewNumeric(t *testing.T) {
 	defer goleak.VerifyNone(t)
+	defer runtime.GC() // Force gc before verifying there are no leaked goroutines
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1304,13 +1299,11 @@ func TestFinalizerNewNumeric(t *testing.T) {
 			tc.SetDefault("pwet", 42)
 		}()
 	}
-
-	// Force gc before verifying there are no leaked goroutines
-	runtime.GC()
 }
 
 func TestFinalizerNewNumericCacher(t *testing.T) {
 	defer goleak.VerifyNone(t)
+	defer runtime.GC() // Force gc before verifying there are no leaked goroutines
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i := 0; i < 5+rand.Intn(15); i++ {
@@ -1321,9 +1314,6 @@ func TestFinalizerNewNumericCacher(t *testing.T) {
 			tc.SetDefault("pwet", 42)
 		}()
 	}
-
-	// Force gc before verifying there are no leaked goroutines
-	runtime.GC()
 }
 
 func BenchmarkCacheGetExpiring(b *testing.B) {
