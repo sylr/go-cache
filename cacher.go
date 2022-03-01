@@ -1,9 +1,10 @@
 package cache
 
 import (
-	"constraints"
 	"errors"
 	"time"
+
+	"golang.org/x/exp/constraints"
 )
 
 var (
